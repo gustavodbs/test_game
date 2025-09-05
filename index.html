@@ -1,110 +1,2446 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Atrapa el Pokémon</title>
-<style>
-:root{--bg1:#0e1022;--bg2:#0a0c1a;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--text:#e8ecff;--muted:#a3a8d6;--accent:#7c5cff;--accent2:#19e6ff;--good:#12d18e;--bad:#ff4d6d;--gold:#ffd700;--legendary:#ff6b6b;--shiny:#ffeb3b}*{box-sizing:border-box}html,body{height:100%;margin:0;color:var(--text);background:radial-gradient(900px 600px at 20% 10%,#171941,transparent),radial-gradient(900px 600px at 90% 0%,#11143a,transparent),linear-gradient(180deg,var(--bg1),var(--bg2));font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif}#layout{display:grid;grid-template-columns:1fr 320px;gap:16px;height:100%;padding:16px}#left{position:relative;display:grid;place-items:center;overflow:hidden}canvas#game{width:100%;height:100%;max-width:1200px;aspect-ratio:16/9;border-radius:18px;background:linear-gradient(180deg,#0b0d22,#070816);box-shadow:0 10px 30px rgba(0,0,0,.35)}.hud{position:absolute;inset:0;pointer-events:none}.hud .top{position:absolute;top:14px;left:14px;right:14px;display:flex;gap:10px;align-items:center;justify-content:space-between}.badge{pointer-events:auto;background:var(--glass);border:1px solid var(--line);padding:10px 14px;border-radius:12px;backdrop-filter:blur(8px);box-shadow:0 10px 24px rgba(0,0,0,.28)}.title{font-weight:900;letter-spacing:.4px}.btn{pointer-events:auto;appearance:none;border:0;padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--accent),#4e8bff);box-shadow:0 8px 20px rgba(0,0,0,.4);transition:all 0.2s}.btn:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(0,0,0,.5)}.btn.ghost{background:var(--glass);color:#dfe3ff;border:1px solid var(--line)}.chip{background:var(--glass);color:var(--muted);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px}.overlay{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,rgba(2,5,18,.55),rgba(2,5,18,.85));backdrop-filter:blur(4px)}.panel{max-width:840px;width:min(92vw,880px);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:18px;padding:24px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.calibration{position:absolute;inset:0;background:rgba(0,0,0,0.8);display:none;place-items:center;z-index:1000}.cal-panel{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:24px;text-align:center;max-width:400px}.cal-progress{width:100%;height:8px;background:var(--glass);border-radius:4px;overflow:hidden;margin:16px 0}.cal-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.3s;width:0%}.powerup-indicator{position:absolute;top:60px;left:14px;display:flex;flex-direction:column;gap:8px}.powerup{background:var(--glass);border:1px solid var(--line);padding:8px 12px;border-radius:10px;font-size:12px;animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:0.8}50%{opacity:1}}aside#side{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;grid-template-rows:auto auto auto auto 1fr;gap:12px}.statbar{display:flex;gap:8px;flex-wrap:wrap}.stat{background:var(--glass);border:1px solid var(--line);padding:6px 10px;border-radius:10px;font-size:12px}.balls{display:flex;gap:6px;flex-wrap:wrap}.ball{width:20px;height:20px;border-radius:50%;position:relative;box-shadow:inset 0 0 0 2px #111}.ball::before{content:"";position:absolute;inset:0;background:conic-gradient(from 0deg,#e23 0 50%,#fff 50% 100%);border-radius:50%}.ball.off{opacity:.25;filter:grayscale(1)}.list{overflow:auto;border-top:1px solid var(--line);padding-top:10px;max-height:300px}.poke{display:grid;grid-template-columns:40px 1fr auto;gap:8px;align-items:center;padding:6px 4px;border-radius:10px;transition:all 0.2s}.poke:hover{background:rgba(255,255,255,.05)}.poke img{width:40px;height:40px;image-rendering:pixelated}.poke.shiny{background:linear-gradient(90deg,rgba(255,235,59,0.1),rgba(255,235,59,0.05));border:1px solid var(--shiny)}.poke.legendary{background:linear-gradient(90deg,rgba(255,107,107,0.1),rgba(255,107,107,0.05));border:1px solid var(--legendary)}.highscore{background:linear-gradient(135deg,var(--gold),#ff8f00);color:#000;font-weight:bold;padding:4px 8px;border-radius:6px;font-size:11px}.centerMsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--glass);border:1px solid var(--line);padding:14px 18px;border-radius:14px;font-weight:700;letter-spacing:.4px;display:none;text-align:center;backdrop-filter:blur(8px)}#debug{position:absolute;right:16px;bottom:16px;display:none;background:var(--glass);border:1px solid var(--line);padding:8px;border-radius:12px}#debug canvas{display:block;width:220px;height:auto;border-radius:10px}video#webcam{display:none}.gesture-hint{position:absolute;right:16px;top:60px;background:var(--glass);border:1px solid var(--line);padding:8px 12px;border-radius:10px;font-size:12px;display:none}.sound-toggle{position:absolute;right:16px;top:16px;background:var(--glass);border:1px solid var(--line);padding:8px;border-radius:10px;cursor:pointer;user-select:none}@media (max-width:900px){#layout{grid-template-columns:1fr}}@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Atrapa el Pokémon</title>
+  <style>
+    :root{
+      --bg1:#0e1022; --bg2:#0a0c1a; --glass:rgba(255,255,255,.06); --line:rgba(255,255,255,.12);
+      --text:#e8ecff; --muted:#a3a8d6; --accent:#7c5cff; --accent2:#19e6ff; --good:#12d18e; --bad:#ff4d6d;
+      --gold:#ffd700; --legendary:#ff6b6b; --shiny:#ffeb3b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; color:var(--text); background:radial-gradient(900px 600px at 20% 10%, #171941, transparent), radial-gradient(900px 600px at 90% 0%, #11143a, transparent), linear-gradient(180deg, var(--bg1), var(--bg2)); font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", sans-serif}
+
+    #layout{display:grid; grid-template-columns: 1fr 320px; gap:16px; height:100%; padding:16px}
+
+    /* LEFT: Game area */
+    #left{position:relative; display:grid; place-items:center; overflow:hidden}
+    canvas#game{width:100%; height:100%; max-width:1200px; aspect-ratio:16/9; border-radius:18px; background:linear-gradient(180deg,#0b0d22,#070816); box-shadow:0 10px 30px rgba(0,0,0,.35)}
+
+    .hud{position:absolute; inset:0; pointer-events:none}
+    .hud .top{position:absolute; top:14px; left:14px; right:14px; display:flex; gap:10px; align-items:center; justify-content:space-between}
+    .badge{pointer-events:auto; background:var(--glass); border:1px solid var(--line); padding:10px 14px; border-radius:12px; backdrop-filter: blur(8px); box-shadow:0 10px 24px rgba(0,0,0,.28)}
+    .title{font-weight:900; letter-spacing:.4px}
+    .btn{pointer-events:auto; appearance:none; border:0; padding:10px 12px; border-radius:12px; font-weight:700; cursor:pointer; color:#fff; background:linear-gradient(135deg, var(--accent), #4e8bff); box-shadow:0 8px 20px rgba(0,0,0,.4); transition:all 0.2s}
+    .btn:hover{transform:translateY(-2px); box-shadow:0 12px 25px rgba(0,0,0,.5)}
+    .btn.ghost{background:var(--glass); color:#dfe3ff; border:1px solid var(--line)}
+    .chip{background:var(--glass); color:var(--muted); border:1px solid var(--line); padding:6px 10px; border-radius:999px; font-size:12px}
+
+    .overlay{position:absolute; inset:0; display:grid; place-items:center; background:linear-gradient(180deg, rgba(2,5,18,.55), rgba(2,5,18,.85)); backdrop-filter: blur(4px)}
+    .panel{max-width:840px; width:min(92vw, 880px); background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid var(--line); border-radius:18px; padding:24px}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+    /* Calibration overlay */
+    .calibration{position:absolute; inset:0; background:rgba(0,0,0,0.8); display:none; place-items:center; z-index:1000}
+    .cal-panel{background:var(--glass); border:1px solid var(--line); border-radius:18px; padding:24px; text-align:center; max-width:400px}
+    .cal-progress{width:100%; height:8px; background:var(--glass); border-radius:4px; overflow:hidden; margin:16px 0}
+    .cal-bar{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width 0.3s; width:0%}
+
+    /* Power-ups */
+    .powerup-indicator{position:absolute; top:60px; left:14px; display:flex; flex-direction:column; gap:8px}
+    .powerup{background:var(--glass); border:1px solid var(--line); padding:8px 12px; border-radius:10px; font-size:12px; animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:0.8} 50%{opacity:1}}
+
+    /* RIGHT: Sidebar */
+    aside#side{background:var(--glass); border:1px solid var(--line); border-radius:18px; padding:14px; display:grid; grid-template-rows:auto auto auto auto 1fr; gap:12px}
+    .statbar{display:flex; gap:8px; flex-wrap:wrap}
+    .stat{background:var(--glass); border:1px solid var(--line); padding:6px 10px; border-radius:10px; font-size:12px}
+    .balls{display:flex; gap:6px; flex-wrap:wrap}
+    .ball{width:20px; height:20px; border-radius:50%; position:relative; box-shadow:inset 0 0 0 2px #111}
+    .ball::before{content:""; position:absolute; inset:0; background:conic-gradient(from 0deg, #e23 0 50%, #fff 50% 100%); border-radius:50%}
+    .ball.off{opacity:.25; filter:grayscale(1)}
+    .list{overflow:auto; border-top:1px solid var(--line); padding-top:10px;max-height: 300px}
+    .poke{display:grid; grid-template-columns:40px 1fr auto; gap:8px; align-items:center; padding:6px 4px; border-radius:10px; transition:all 0.2s}
+    .poke:hover{background:rgba(255,255,255,.05)}
+    .poke img{width:40px; height:40px; image-rendering:pixelated}
+    .poke.shiny{background:linear-gradient(90deg, rgba(255,235,59,0.1), rgba(255,235,59,0.05)); border:1px solid var(--shiny)}
+    .poke.legendary{background:linear-gradient(90deg, rgba(255,107,107,0.1), rgba(255,107,107,0.05)); border:1px solid var(--legendary)}
+
+    /* High score display */
+    .highscore{background:linear-gradient(135deg, var(--gold), #ff8f00); color:#000; font-weight:bold; padding:4px 8px; border-radius:6px; font-size:11px}
+
+    /* Center pause message */
+    .centerMsg{position:absolute; left:50%; top:50%; transform:translate(-50%, -50%); background:var(--glass); border:1px solid var(--line); padding:14px 18px; border-radius:14px; font-weight:700; letter-spacing:.4px; display:none; text-align:center; backdrop-filter:blur(8px)}
+
+    /* Webcam debug */
+    #debug{position:absolute; right:16px; bottom:16px; display:none; background:var(--glass); border:1px solid var(--line); padding:8px; border-radius:12px}
+    #debug canvas{display:block; width:220px; height:auto; border-radius:10px}
+
+    video#webcam{display:none}
+
+    /* Gesture indicator */
+    .gesture-hint{position:absolute; right:16px; top:60px; background:var(--glass); border:1px solid var(--line); padding:8px 12px; border-radius:10px; font-size:12px; display:none}
+
+    /* Sound toggle */
+    .sound-toggle{position:absolute; right:16px; top:16px; background:var(--glass); border:1px solid var(--line); padding:8px; border-radius:10px; cursor:pointer; user-select:none}
+
+    @media (max-width: 900px){ #layout{grid-template-columns:1fr} }
+  </style>
+  <!-- MediaPipe Hands (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 </head>
 <body>
-<div id="layout">
-<div id="left">
-<canvas id="game"></canvas>
-<div class="hud">
-<div class="top">
-<div class="badge"></div>
-<div class="row">
-<span class="chip">Modo: <b id="modeChip">Mano</b></span>
-<button class="btn ghost" id="toggleDebug">Ver cámara</button>
-<button class="btn ghost" id="toggleMode">Usar teclado</button>
-<button class="btn ghost" id="calibrateBtn" style="display:none">Calibrar</button>
-</div>
-</div>
-<div class="powerup-indicator" id="powerups"></div>
-<div class="gesture-hint" id="gestureHint">🖐 Gesto detectado</div>
-</div>
-<div class="calibration" id="calibration">
-<div class="cal-panel">
-<h3>Calibración de Mano</h3>
-<p>Mueve tu mano de izquierda a derecha por toda la pantalla</p>
-<div class="cal-progress">
-<div class="cal-bar" id="calProgress"></div>
-</div>
-<p id="calText">Progreso: 0%</p>
-</div>
-</div>
-<div class="overlay" id="menu">
-<div class="panel">
-<h1 style="margin:0 0 10px">Atrapa el Pokémon</h1>
-<p style="margin:0 0 14px;color:var(--muted)">Atrapa <b>35</b> antes de 1 minuto para ganar. Tienes <b>22 pokébolas</b> (vidas). Si un Pokémon toca el piso, pierdes una.</p>
-<div class="row">
-<button class="btn" id="startHands">Permitir cámara (mano) & Jugar</button>
-<button class="btn ghost" id="startKb">Jugar con teclado</button>
-</div>
-<p style="margin-top:10px;color:var(--muted)">Levanta una <b>mano</b> visible a cámara y muévela izquierda↔derecha para controlar la canasta.</p>
-</div>
-</div>
-<div class="overlay" id="over" style="display:none">
-<div class="panel">
-<h2 id="overTitle">Game Over</h2>
-<p id="overMsg">¡Se acabó el tiempo!</p>
-<div class="row">
-<button class="btn" id="retry">Reintentar</button>
-<button class="btn ghost" id="toMenu">Menú</button>
-</div>
-</div>
-</div>
-<div class="sound-toggle" id="soundToggle">🔊</div>
-<div id="debug"><canvas id="handsCanvas" width="320" height="180"></canvas></div>
-<div class="centerMsg" id="centerMsg">Por favor levante la mano 🙌</div>
-<video id="webcam" autoplay playsinline muted></video>
-</div>
-<aside id="side">
-<div>
-<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-<div class="statbar">
-<div class="stat">⏱ <b id="time">03:00</b></div>
-<div class="stat">⭐ Puntos: <b id="score">0</b></div>
-<div class="stat">🎯 Capturados: <b id="caught">0</b>/35</div>
-</div>
-</div>
-<div style="margin-top:8px" class="balls" id="lives"></div>
-</div>
-<div>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-<span style="font-size:12px;color:var(--muted)">Récord Personal</span>
-<span class="highscore" id="highScore">0</span>
-</div>
-<div class="statbar">
-<div class="stat">⚔️ Atk: <b id="atk">0</b></div>
-<div class="stat">🛡 Def: <b id="def">0</b></div>
-<div class="stat">💨 Spd: <b id="spd">0</b></div>
-</div>
-</div>
-<div>
-<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Multiplicadores Activos</div>
-<div class="statbar">
-<div class="stat">📈 Puntos: <b id="multiplier">x1</b></div>
-<div class="stat">🏀 Canasta: <b id="basketSize">Normal</b></div>
-</div>
-</div>
-<div>
-<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Especiales Capturados</div>
-<div class="statbar">
-<div class="stat">✨ Shiny: <b id="shinyCount">0</b></div>
-<div class="stat">🔥 Legendarios: <b id="legendaryCount">0</b></div>
-</div>
-</div>
-<div class="list" id="list"></div>
-</aside>
-</div>
-<script>
-(()=>{const GameStates={MENU:'menu',PLAYING:'playing',PAUSED:'paused',CALIBRATING:'calibrating',GAME_OVER:'game_over'};class GameData{static save(data){try{localStorage.setItem('pokemonCatcherStats',JSON.stringify(data))}catch(e){}}static load(){try{return JSON.parse(localStorage.getItem('pokemonCatcherStats')||'{}')}catch(e){return{}}}static updateHighScore(score){const data=this.load();data.highScore=Math.max(data.highScore||0,score);data.totalGames=(data.totalGames||0)+1;data.totalCaught=(data.totalCaught||0)+captured;this.save(data);return data.highScore}static getHighScore(){return this.load().highScore||0}}class AudioManager{constructor(){this.enabled=true;this.context=null;this.sounds={};this.initSynthSounds()}initSynthSounds(){if(typeof AudioContext!=='undefined'||typeof webkitAudioContext!=='undefined'){this.context=new(AudioContext||webkitAudioContext)()}}toggle(){this.enabled=!this.enabled;return this.enabled}playTone(frequency,duration,type='sine'){if(!this.enabled||!this.context)return;try{const oscillator=this.context.createOscillator();const gainNode=this.context.createGain();oscillator.connect(gainNode);gainNode.connect(this.context.destination);oscillator.frequency.setValueAtTime(frequency,this.context.currentTime);oscillator.type=type;gainNode.gain.setValueAtTime(0.1,this.context.currentTime);gainNode.gain.exponentialRampToValueAtTime(0.01,this.context.currentTime+duration);oscillator.start(this.context.currentTime);oscillator.stop(this.context.currentTime+duration)}catch(e){}}playCatch(){this.playTone(523.25,0.2,'square');setTimeout(()=>this.playTone(659.25,0.15,'square'),100)}playMiss(){this.playTone(196,0.3,'sawtooth')}playPowerUp(){this.playTone(440,0.1,'sine');setTimeout(()=>this.playTone(554.37,0.1,'sine'),100);setTimeout(()=>this.playTone(659.25,0.2,'sine'),200)}playSpecialCatch(){for(let i=0;i<5;i++){setTimeout(()=>this.playTone(440+i*110,0.1,'sine'),i*50)}}}class EnhancedKalmanFilter{constructor(processNoise=0.008,measurementNoise=0.03){this.processNoise=processNoise;this.measurementNoise=measurementNoise;this.estimate=0;this.velocity=0;this.errorCovariance=1;this.velocityCovariance=1;this.lastTime=performance.now();this.adaptiveMode=true;this.velocityHistory=[];this.maxVelocityHistory=5}update(measurement,currentTime=performance.now()){const deltaTime=(currentTime-this.lastTime)/1000;this.lastTime=currentTime;const predictedEstimate=this.estimate+this.velocity*deltaTime;const predictedError=this.errorCovariance+this.processNoise*deltaTime;const predictedVelocityError=this.velocityCovariance+this.processNoise*deltaTime;let adaptedMeasurementNoise=this.measurementNoise;if(this.adaptiveMode&&Math.abs(this.velocity)>2.0){adaptedMeasurementNoise*=0.6}const kalmanGain=predictedError/(predictedError+adaptedMeasurementNoise);const velocityGain=predictedVelocityError/(predictedVelocityError+adaptedMeasurementNoise);const measuredVelocity=deltaTime>0?(measurement-this.estimate)/deltaTime:0;this.estimate=predictedEstimate+kalmanGain*(measurement-predictedEstimate);this.velocity=this.velocity+velocityGain*(measuredVelocity-this.velocity);this.errorCovariance=(1-kalmanGain)*predictedError;this.velocityCovariance=(1-velocityGain)*predictedVelocityError;this.velocityHistory.push(this.velocity);if(this.velocityHistory.length>this.maxVelocityHistory){this.velocityHistory.shift()}return this.estimate}predict(deltaTime){const acceleration=this.getAcceleration();return this.estimate+this.velocity*deltaTime+0.5*acceleration*deltaTime*deltaTime}getAcceleration(){if(this.velocityHistory.length<2)return 0;const recent=this.velocityHistory.slice(-2);return recent[1]-recent[0]}getVelocity(){return this.velocity}reset(){this.estimate=0;this.velocity=0;this.velocityHistory=[];this.errorCovariance=1;this.velocityCovariance=1}}class HandPositionBuffer{constructor(maxSize=10){this.positions=[];this.maxSize=maxSize;this.lastValidTime=0;this.missedFrameThreshold=50}addPosition(x,y,timestamp=performance.now()){this.positions.push({x:x,y:y,timestamp:timestamp,confidence:1.0});if(this.positions.length>this.maxSize){this.positions.shift()}this.lastValidTime=timestamp}interpolatePosition(currentTime){if(this.positions.length<2)return null;const timeSinceLastFrame=currentTime-this.lastValidTime;if(timeSinceLastFrame<this.missedFrameThreshold){return this.positions[this.positions.length-1]}const recent=this.positions.slice(-2);const deltaTime=recent[1].timestamp-recent[0].timestamp;const velocity={x:deltaTime>0?(recent[1].x-recent[0].x)/deltaTime:0,y:deltaTime>0?(recent[1].y-recent[0].y)/deltaTime:0};const extrapolationTime=timeSinceLastFrame;return{x:recent[1].x+velocity.x*extrapolationTime,y:recent[1].y+velocity.y*extrapolationTime,timestamp:currentTime,confidence:Math.max(0.1,1.0-timeSinceLastFrame/200)}}getVelocity(){if(this.positions.length<2)return{x:0,y:0};const recent=this.positions.slice(-2);const deltaTime=recent[1].timestamp-recent[0].timestamp;return{x:deltaTime>0?(recent[1].x-recent[0].x)/deltaTime:0,y:deltaTime>0?(recent[1].y-recent[0].y)/deltaTime:0}}getSmoothedPosition(smoothingFactor=0.7){if(this.positions.length===0)return null;if(this.positions.length===1)return this.positions[0];let smoothed=this.positions[0];for(let i=1;i<this.positions.length;i++){const current=this.positions[i];smoothed={x:smoothed.x*(1-smoothingFactor)+current.x*smoothingFactor,y:smoothed.y*(1-smoothingFactor)+current.y*smoothingFactor,timestamp:current.timestamp,confidence:current.confidence}}return smoothed}clear(){this.positions=[];this.lastValidTime=0}}class GestureDetector{constructor(){this.positions=[];this.maxHistory=15;this.lastGesture=null;this.gestureTimeout=0;this.minimumSwipeDistance=0.15;this.maximumSwipeTime=400}addPosition(x,y){this.positions.push({x,y,time:performance.now()});if(this.positions.length>this.maxHistory){this.positions.shift()}}detectSwipe(){if(this.positions.length<6)return null;const recent=this.positions.slice(-6);const deltaX=recent[5].x-recent[0].x;const deltaTime=recent[5].time-recent[0].time;if(Math.abs(deltaX)>this.minimumSwipeDistance&&deltaTime<this.maximumSwipeTime){const gesture=deltaX>0?'swipe_right':'swipe_left';if(gesture!==this.lastGesture||performance.now()-this.gestureTimeout>800){this.lastGesture=gesture;this.gestureTimeout=performance.now();return gesture}}return null}getSwipeVelocity(){if(this.positions.length<3)return 0;const recent=this.positions.slice(-3);const deltaX=recent[2].x-recent[0].x;const deltaTime=recent[2].time-recent[0].time;return deltaTime>0?Math.abs(deltaX)/(deltaTime/1000):0}}class HandCalibration{constructor(){this.minX=1;this.maxX=0;this.calibrationFrames=0;this.maxFrames=180;this.isCalibrating=false}start(){this.minX=1;this.maxX=0;this.calibrationFrames=0;this.isCalibrating=true;els.calibration.style.display='grid'}calibrate(handX){if(!this.isCalibrating)return false;this.minX=Math.min(this.minX,handX);this.maxX=Math.max(this.maxX,handX);this.calibrationFrames++;const progress=(this.calibrationFrames/this.maxFrames)*100;els.calProgress.style.width=progress+'%';els.calText.textContent=`Progreso: ${Math.round(progress)}%`;if(this.calibrationFrames>=this.maxFrames){this.isCalibrating=false;els.calibration.style.display='none';return true}return false}normalize(x){if(this.maxX<=this.minX)return 0.5;return(x-this.minX)/(this.maxX-this.minX)}}class ParticleSystem{constructor(){this.particles=[]}addCatchEffect(x,y,color='#7c5cff'){for(let i=0;i<12;i++){this.particles.push({x,y,vx:(Math.random()-0.5)*300,vy:-Math.random()*200-50,life:1.0,maxLife:1.0,size:2+Math.random()*4,color:color})}}addSpecialEffect(x,y,type){const colors={shiny:['#ffeb3b','#ffc107','#ff9800'],legendary:['#ff6b6b','#ff5722','#e91e63'],powerup:['#4caf50','#8bc34a','#cddc39']};const colorSet=colors[type]||colors.powerup;for(let i=0;i<20;i++){this.particles.push({x:x+(Math.random()-0.5)*40,y:y+(Math.random()-0.5)*40,vx:(Math.random()-0.5)*200,vy:-Math.random()*150-30,life:1.5,maxLife:1.5,size:3+Math.random()*6,color:colorSet[Math.floor(Math.random()*colorSet.length)]})}}update(dt){for(let i=this.particles.length-1;i>=0;i--){const p=this.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=300*dt;p.life-=dt;if(p.life<=0){this.particles.splice(i,1)}}}render(ctx){ctx.save();for(const p of this.particles){const alpha=p.life/p.maxLife;ctx.globalAlpha=alpha;ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*alpha,0,Math.PI*2);ctx.fill()}ctx.restore()}}class PowerUpManager{constructor(){this.activePowerUps=new Map();this.powerUpTypes={SLOW_TIME:{name:'🐌 Tiempo Lento',duration:8000,color:'#4fc3f7',activate:()=>{timeDilation=0.5},deactivate:()=>{timeDilation=1.0}},BIGGER_BASKET:{name:'🏀 Canasta Grande',duration:10000,color:'#66bb6a',activate:()=>{player.w=originalBasketWidth*1.8},deactivate:()=>{player.w=originalBasketWidth}},DOUBLE_POINTS:{name:'💎 Puntos x2',duration:12000,color:'#ffd54f',activate:()=>{scoreMultiplier=2},deactivate:()=>{scoreMultiplier=1}},MAGNET:{name:'🧲 Imán',duration:6000,color:'#e57373',activate:()=>{magnetActive=true},deactivate:()=>{magnetActive=false}}}}addPowerUp(type){if(this.activePowerUps.has(type)){this.activePowerUps.get(type).remaining=this.powerUpTypes[type].duration;return}const powerUp=this.powerUpTypes[type];powerUp.activate();this.activePowerUps.set(type,{remaining:powerUp.duration,type:powerUp});audioManager.playPowerUp();particleSystem.addSpecialEffect(player.x,player.y-50,'powerup');this.updateUI()}update(dt){for(const[type,powerUp]of this.activePowerUps){powerUp.remaining-=dt*1000;if(powerUp.remaining<=0){powerUp.type.deactivate();this.activePowerUps.delete(type)}}this.updateUI()}updateUI(){const container=els.powerups;container.innerHTML='';for(const[type,powerUp]of this.activePowerUps){const div=document.createElement('div');div.className='powerup';div.style.borderLeftColor=powerUp.type.color;div.innerHTML=`${powerUp.type.name} <br><small>${Math.ceil(powerUp.remaining/1000)}s</small>`;container.appendChild(div)}els.multiplier.textContent=`x${scoreMultiplier}`;els.basketSize.textContent=player.w>originalBasketWidth?'Grande':'Normal'}}class DifficultyManager{constructor(){this.playerSkill=0.5;this.recentPerformance=[];this.adaptationRate=0.1}updateSkill(caught,missed,totalTime){const total=caught+missed;if(total===0)return;const accuracy=caught/total;const timeBonus=Math.max(0,1-(totalTime/ROUND_MS));const performance=accuracy*0.8+timeBonus*0.2;this.recentPerformance.push(performance);if(this.recentPerformance.length>10){this.recentPerformance.shift()}const avgPerformance=this.recentPerformance.reduce((a,b)=>a+b,0)/this.recentPerformance.length;this.playerSkill=this.playerSkill*(1-this.adaptationRate)+avgPerformance*this.adaptationRate;this.adjustDifficulty();els.skillChip.textContent=Math.round(this.playerSkill*100)+'%'}adjustDifficulty(){const baseSpawnInterval=900;const baseFallSpeed=120;const skillFactor=(this.playerSkill-0.5)*2;spawnInterval=Math.max(300,baseSpawnInterval-skillFactor*300);baseFall=Math.max(80,baseFallSpeed+skillFactor*100)}}class ObjectPool{constructor(createFn,resetFn){this.objects=[];this.createFn=createFn;this.resetFn=resetFn}get(){if(this.objects.length>0){return this.objects.pop()}return this.createFn()}release(obj){this.resetFn(obj);this.objects.push(obj)}}const canvas=document.getElementById('game');const ctx=canvas.getContext('2d');let resizeTimeout;function fit(){clearTimeout(resizeTimeout);resizeTimeout=setTimeout(()=>{const right=document.getElementById('side');const sideW=right?.offsetWidth||320;const gap=16;const pad=16;const maxW=Math.min(window.innerWidth-sideW-gap-pad*2,1200);const maxH=Math.min(window.innerHeight-pad*2,760);let w=Math.max(640,maxW),h=Math.round(w*9/16);if(h>maxH){h=maxH;w=Math.round(h*16/9)}const dpr=window.devicePixelRatio||1;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0);VW=w;VH=h;player.y=VH-80},100)}let VW=0,VH=0;window.addEventListener('resize',fit);const els={menu:document.getElementById('menu'),over:document.getElementById('over'),overTitle:document.getElementById('overTitle'),overMsg:document.getElementById('overMsg'),startHands:document.getElementById('startHands'),startKb:document.getElementById('startKb'),retry:document.getElementById('retry'),toMenu:document.getElementById('toMenu'),time:document.getElementById('time'),score:document.getElementById('score'),caught:document.getElementById('caught'),atk:document.getElementById('atk'),def:document.getElementById('def'),spd:document.getElementById('spd'),list:document.getElementById('list'),lives:document.getElementById('lives'),modeChip:document.getElementById('modeChip'),toggleMode:document.getElementById('toggleMode'),toggleDebug:document.getElementById('toggleDebug'),handsCanvas:document.getElementById('handsCanvas'),webcam:document.getElementById('webcam'),debug:document.getElementById('debug'),centerMsg:document.getElementById('centerMsg'),calibration:document.getElementById('calibration'),calProgress:document.getElementById('calProgress'),calText:document.getElementById('calText'),calibrateBtn:document.getElementById('calibrateBtn'),skillChip:document.getElementById('skillChip'),powerups:document.getElementById('powerups'),gestureHint:document.getElementById('gestureHint'),soundToggle:document.getElementById('soundToggle'),highScore:document.getElementById('highScore'),multiplier:document.getElementById('multiplier'),basketSize:document.getElementById('basketSize'),shinyCount:document.getElementById('shinyCount'),legendaryCount:document.getElementById('legendaryCount')};const ROUND_MS=1*60*1000;const TARGET_CATCH=35;const MAX_LIVES=22;let state=GameStates.MENU;let control='hands';let score=0,captured=0,lives=MAX_LIVES;let startTime=0;let paused=false,pauseStart=null,pausedMs=0;const team={atk:0,def:0,spd:0};let shinyCount=0,legendaryCount=0;let scoreMultiplier=1;let timeDilation=1.0;let magnetActive=false;let lastHandDetectedTime=0;const HAND_LOSS_DELAY=1000;let handLostMessageShown=false;const originalBasketWidth=100;const player={x:0,y:0,w:originalBasketWidth,h:26,speed:14};const mons=[];let lastSpawn=0,spawnInterval=900;let baseFall=120;let totalMissed=0;const audioManager=new AudioManager();const particleSystem=new ParticleSystem();const powerUpManager=new PowerUpManager();const difficultyManager=new DifficultyManager();const kalmanFilter=new EnhancedKalmanFilter(0.008,0.03);const gestureDetector=new GestureDetector();const handCalibration=new HandCalibration();const handPositionBuffer=new HandPositionBuffer(15);const advancedHandController={frameSkipCounter:0,maxFrameSkip:1,lastProcessTime:0,targetFrameTime:1000/60,smoothingEnabled:true,predictionEnabled:true,optimizePerformance(){const avgFPS=perfMonitor?.getFPS()||60;const currentParticles=particleSystem?.particles.length||0;if(avgFPS<45){this.maxFrameSkip=Math.min(3,this.maxFrameSkip+1);this.predictionEnabled=true}else if(avgFPS>55&&this.maxFrameSkip>1){this.maxFrameSkip=Math.max(1,this.maxFrameSkip-1)}if(avgFPS<30){kalmanFilter.adaptiveMode=false}else{kalmanFilter.adaptiveMode=true}if(avgFPS<35&&currentParticles>30){particleSystem.particles.splice(0,10)}}};setInterval(()=>{if(typeof perfMonitor!=='undefined'){advancedHandController.optimizePerformance()}},5000);const pokemonPool=new ObjectPool(()=>({}),(mon)=>{Object.keys(mon).forEach(key=>delete mon[key])});const keys=new Set();window.addEventListener('keydown',e=>keys.add(e.key.toLowerCase()));window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));function keyboardInput(dt){const L=keys.has('arrowleft')||keys.has('a');const R=keys.has('arrowright')||keys.has('d');if(L&&!R)player.x-=player.speed*60*dt;if(R&&!L)player.x+=player.speed*60*dt}const htx=els.handsCanvas.getContext('2d');const handsCtrl={active:false,normX:0.5,handUp:false,invertX:true,async start(){try{const stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:360},facingMode:'user'}});els.webcam.srcObject=stream;await els.webcam.play();const hands=new Hands({locateFile:(file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});hands.setOptions({maxNumHands:1,modelComplexity:0,minDetectionConfidence:0.4,minTrackingConfidence:0.2,staticImageMode:false,useCpuInference:false});hands.onResults(onResults);const cam=new Camera(els.webcam,{width:640,height:360,onFrame:async()=>{await hands.send({image:els.webcam})}});cam.start();this.active=true;this.lastValidTime=performance.now();els.calibrateBtn.style.display='block'}catch(e){alert('No se pudo iniciar detección de mano: '+e.message);this.active=false}}};function onResults(res){const currentTime=performance.now();const W=els.handsCanvas.width,H=els.handsCanvas.height;advancedHandController.frameSkipCounter++;const shouldProcess=advancedHandController.frameSkipCounter>=advancedHandController.maxFrameSkip;if(shouldProcess){advancedHandController.frameSkipCounter=0;advancedHandController.lastProcessTime=currentTime}htx.clearRect(0,0,W,H);if(res.image)htx.drawImage(res.image,0,0,W,H);const list=res.multiHandLandmarks||[];if(list.length>=1){const lm=list[0];const palmIndices=[0,5,9,13,17];const wristWeight=2.0;let x=0,y=0,totalWeight=0;for(let i=0;i<palmIndices.length;i++){const idx=palmIndices[i];const weight=idx===0?wristWeight:1.0;x+=lm[idx].x*weight;y+=lm[idx].y*weight;totalWeight+=weight}x/=totalWeight;y/=totalWeight;let raw=x;if(handsCtrl.invertX)raw=1-raw;handPositionBuffer.addPosition(raw,y,currentTime);if(shouldProcess){if(handCalibration.isCalibrating){handCalibration.calibrate(raw)}else if(handCalibration.maxX>handCalibration.minX){raw=handCalibration.normalize(raw)}handsCtrl.normX=kalmanFilter.update(raw,currentTime);const handUpThreshold=0.65;const currentHandUp=y<handUpThreshold;if(!handsCtrl.handUp&&currentHandUp){const recent=handPositionBuffer.positions.slice(-3);const avgY=recent.reduce((sum,pos)=>sum+pos.y,0)/recent.length;handsCtrl.handUp=avgY<handUpThreshold}else if(handsCtrl.handUp&&!currentHandUp){handsCtrl.handUp=y<(handUpThreshold+0.1)}else{handsCtrl.handUp=currentHandUp}gestureDetector.addPosition(x,y);const gesture=gestureDetector.detectSwipe();if(gesture){const swipeVelocity=gestureDetector.getSwipeVelocity();showGestureHint(gesture,swipeVelocity);if(state===GameStates.PLAYING&&Math.random()<0.3){const powerUpTypes=Object.keys(powerUpManager.powerUpTypes);const randomPowerUp=powerUpTypes[Math.floor(Math.random()*powerUpTypes.length)];powerUpManager.addPowerUp(randomPowerUp)}}}else{if(advancedHandController.predictionEnabled){const interpolated=handPositionBuffer.interpolatePosition(currentTime);if(interpolated&&interpolated.confidence>0.5){let interpolatedX=interpolated.x;if(handCalibration.maxX>handCalibration.minX){interpolatedX=handCalibration.normalize(interpolatedX)}handsCtrl.normX=kalmanFilter.update(interpolatedX,currentTime)}}}const velocity=handPositionBuffer.getVelocity();const velocityMagnitude=Math.sqrt(velocity.x*velocity.x+velocity.y*velocity.y);const velocityColor=velocityMagnitude>0.5?`hsl(${Math.max(0,240-velocityMagnitude*200)}, 80%, 60%)`:'#6ef';drawConnectors(htx,lm,HAND_CONNECTIONS,{color:velocityColor,lineWidth:2});drawLandmarks(htx,lm,{color:'#fff',lineWidth:1});if(debugVisible&&velocityMagnitude>0.1){htx.strokeStyle='#ff0';htx.lineWidth=3;htx.beginPath();htx.moveTo(x*W,y*H);htx.lineTo((x+velocity.x*100)*W,(y+velocity.y*100)*H);htx.stroke()}}else{if(advancedHandController.predictionEnabled){const interpolated=handPositionBuffer.interpolatePosition(currentTime);if(interpolated&&interpolated.confidence>0.3){handsCtrl.handUp=true;let interpolatedX=interpolated.x;if(handCalibration.maxX>handCalibration.minX){interpolatedX=handCalibration.normalize(interpolatedX)}handsCtrl.normX=kalmanFilter.update(interpolatedX,currentTime)}else{handsCtrl.handUp=false;handPositionBuffer.clear()}}else{handsCtrl.handUp=false}}const processingTime=performance.now()-currentTime;if(processingTime>advancedHandController.targetFrameTime*1.5){advancedHandController.maxFrameSkip=Math.min(3,advancedHandController.maxFrameSkip+1)}else if(processingTime<advancedHandController.targetFrameTime*0.5&&advancedHandController.maxFrameSkip>1){advancedHandController.maxFrameSkip=Math.max(1,advancedHandController.maxFrameSkip-1)}}function showGestureHint(gesture,velocity=0){els.gestureHint.style.display='block';const speedText=velocity>1.5?' (Rápido)':velocity>0.8?' (Medio)':' (Lento)';els.gestureHint.textContent=gesture==='swipe_right'?`👉 Gesto derecha${speedText}`:`👈 Gesto izquierda${speedText}`;setTimeout(()=>{els.gestureHint.style.display='none'},1000)}const cache=new Map();async function fetchPokemon(id){if(cache.has(id))return cache.get(id);try{const res=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);const j=await res.json();const stats={};for(const s of j.stats){stats[s.stat.name]=s.base_stat}const mon={id,name:j.name,atk:stats['attack']||0,def:stats['defense']||0,spd:stats['speed']||0,sprite:`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,isLegendary:isLegendaryPokemon(id),isShiny:Math.random()<0.05};const img=new Image();img.crossOrigin='anonymous';img.src=mon.sprite;mon.img=img;cache.set(id,mon);return mon}catch(e){console.error('Error fetching pokemon:',e);return null}}function isLegendaryPokemon(id){const legendaryIds=[144,145,146,150,151];return legendaryIds.includes(id)||Math.random()<0.02}function randMonId(){return Math.floor(1+Math.random()*151)}async function spawnMon(){const id=randMonId();const mon=await fetchPokemon(id);if(!mon)return;const scale=0.9+Math.random()*0.5;const w=56*scale,h=56*scale;const x=20+Math.random()*(VW-40-w);const vy=(baseFall+Math.random()*80+captured*1.2)*timeDilation;const monObj=pokemonPool.get();Object.assign(monObj,{ref:mon,x,y:-h,w,h,vy,isPowerUp:Math.random()<0.1});mons.push(monObj)}function renderLives(){els.lives.innerHTML='';for(let i=0;i<MAX_LIVES;i++){const s=document.createElement('div');s.className='ball'+(i<lives?'':' off');els.lives.appendChild(s)}}function addCaught(mon){const li=document.createElement('div');li.className='poke';if(mon.isShiny){li.classList.add('shiny');shinyCount++;els.shinyCount.textContent=shinyCount}if(mon.isLegendary){li.classList.add('legendary');legendaryCount++;els.legendaryCount.textContent=legendaryCount}const nameDisplay=mon.name.charAt(0).toUpperCase()+mon.name.slice(1);const specialText=mon.isShiny?' ✨':(mon.isLegendary?' 🔥':'');li.innerHTML=`<img src="${mon.sprite}" alt="${mon.name}"><div style="text-transform:capitalize">${nameDisplay}${specialText}</div><div style="font-size:10px;color:var(--muted)">⚔ ${mon.atk} • 🛡 ${mon.def} • 💨 ${mon.spd}</div>`;els.list.prepend(li)}function setTeamStats(){els.atk.textContent=team.atk;els.def.textContent=team.def;els.spd.textContent=team.spd}function start(mode){control=mode;state=GameStates.PLAYING;score=0;captured=0;lives=MAX_LIVES;shinyCount=0;legendaryCount=0;totalMissed=0;scoreMultiplier=1;timeDilation=1.0;magnetActive=false;team.atk=team.def=team.spd=0;els.list.innerHTML='';renderLives();setTeamStats();spawnInterval=900;baseFall=120;lastSpawn=0;mons.length=0;startTime=performance.now();paused=false;pauseStart=null;pausedMs=0;powerUpManager.activePowerUps.clear();powerUpManager.updateUI();particleSystem.particles.length=0;els.menu.style.display='none';els.over.style.display='none';els.shinyCount.textContent='0';els.legendaryCount.textContent='0';fit()}function endGame(title,msg){state=GameStates.GAME_OVER;const totalTime=performance.now()-startTime-pausedMs;difficultyManager.updateSkill(captured,totalMissed,totalTime);const newHighScore=GameData.updateHighScore(score);els.highScore.textContent=newHighScore;for(const[type,powerUp]of powerUpManager.activePowerUps){powerUp.type.deactivate()}powerUpManager.activePowerUps.clear();powerUpManager.updateUI();els.overTitle.textContent=title;els.overMsg.innerHTML=msg;els.over.style.display='grid'}function drawTrainer(){ctx.save();ctx.translate(player.x,player.y);ctx.shadowColor='rgba(124,92,255,.7)';ctx.shadowBlur=24;const gradient=ctx.createLinearGradient(-player.w/2,0,player.w/2,player.h);gradient.addColorStop(0,'rgba(124,92,255,.92)');gradient.addColorStop(1,'rgba(124,92,255,.7)');ctx.fillStyle=gradient;const w=player.w,h=player.h,r=12;ctx.beginPath();ctx.moveTo(-w/2+r,0);ctx.arcTo(w/2,0,w/2,h,r);ctx.arcTo(w/2,h,-w/2,h,r);ctx.arcTo(-w/2,h,-w/2,0,r);ctx.arcTo(-w/2,0,w/2,0,r);ctx.closePath();ctx.fill();if(magnetActive){ctx.strokeStyle='#e57373';ctx.lineWidth=3;ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(0,h/2,w/2+20,0,Math.PI*2);ctx.stroke();ctx.setLineDash([])}ctx.fillStyle='hsl(200 80% 70%)';ctx.beginPath();ctx.arc(0,-10,6,0,Math.PI*2);ctx.fill();ctx.restore()}function drawMon(m){ctx.save();if(m.ref.isShiny){ctx.shadowColor='#ffeb3b';ctx.shadowBlur=15}else if(m.ref.isLegendary){ctx.shadowColor='#ff6b6b';ctx.shadowBlur=20}if(m.isPowerUp){ctx.strokeStyle='#4caf50';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.strokeRect(m.x-5,m.y-5,m.w+10,m.h+10);ctx.setLineDash([])}const{img}=m.ref;if(img&&img.complete){ctx.drawImage(img,m.x,m.y,m.w,m.h)}else{ctx.fillStyle='#ffd';ctx.fillRect(m.x,m.y,m.w,m.h)}ctx.restore()}function drawBackground(dt){const time=performance.now()*0.001;const g=ctx.createRadialGradient(VW/2+Math.sin(time*0.5)*100,VH*0.2,VW*0.1,VW/2,VH*0.2,VW*0.9);g.addColorStop(0,'rgba(124,92,255,.18)');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);ctx.save();ctx.fillStyle='rgba(25,230,255,.08)';ctx.beginPath();ctx.ellipse(VW/2,VH-24,VW/2.6,40,Math.sin(time)*0.1,0,Math.PI*2);ctx.fill();ctx.restore()}function collide(a,b){return!(a.x+a.w<b.x||b.x+b.w<a.x||a.y+a.h<b.y||b.y+b.h<a.y)}function distance(a,b){const dx=(a.x+a.w/2)-(b.x+b.w/2);const dy=(a.y+a.h/2)-(b.y+b.h/2);return Math.sqrt(dx*dx+dy*dy)}let last=performance.now(),debugVisible=false;function loop(now){const dt=Math.min(0.035,(now-last)/1000);last=now;if(state===GameStates.PLAYING){update(dt,now);render(dt)}requestAnimationFrame(loop)}requestAnimationFrame(loop);function update(dt,now){if(control==='hands'){const ok=handsCtrl.active&&handsCtrl.handUp;if(!ok){if(!paused){paused=true;pauseStart=now;els.centerMsg.style.display='block';els.centerMsg.textContent='Por favor levante la mano 🙌'}}else{if(paused){paused=false;if(pauseStart){pausedMs+=(now-pauseStart);pauseStart=null}els.centerMsg.style.display='none'}const nx=handsCtrl.normX;const target=30+nx*(VW-60);player.x+=(target-player.x)*0.25}}else{if(paused){paused=false;if(pauseStart){pausedMs+=(now-pauseStart);pauseStart=null}els.centerMsg.style.display='none'}keyboardInput(dt)}player.x=Math.max(30,Math.min(VW-30,player.x));if(!paused){powerUpManager.update(dt);particleSystem.update(dt);const effectiveDt=dt*timeDilation;spawnInterval=Math.max(260,spawnInterval-effectiveDt*3);baseFall=Math.min(500,baseFall+effectiveDt*10);lastSpawn+=effectiveDt*1000;if(lastSpawn>spawnInterval){lastSpawn=0;spawnMon();if(Math.random()<0.35)spawnMon()}const trainerCenter={x:player.x,y:player.y-player.h/2};for(let i=mons.length-1;i>=0;i--){const m=mons[i];m.y+=m.vy*effectiveDt;if(magnetActive){const dist=distance(trainerCenter,{x:m.x+m.w/2,y:m.y+m.h/2});if(dist<150){const pull=200*effectiveDt*(1-dist/150);const dx=trainerCenter.x-(m.x+m.w/2);const dy=trainerCenter.y-(m.y+m.h/2);const len=Math.sqrt(dx*dx+dy*dy);if(len>0){m.x+=(dx/len)*pull;m.y+=(dy/len)*pull}}}}const trainerRect={x:player.x-player.w/2,y:player.y-player.h,w:player.w,h:player.h+10};for(let i=mons.length-1;i>=0;i--){const m=mons[i];const monRect={x:m.x,y:m.y,w:m.w,h:m.h};if(collide(trainerRect,monRect)){let points=1;if(m.ref.isShiny){points=5;particleSystem.addSpecialEffect(m.x+m.w/2,m.y+m.h/2,'shiny');audioManager.playSpecialCatch()}else if(m.ref.isLegendary){points=10;particleSystem.addSpecialEffect(m.x+m.w/2,m.y+m.h/2,'legendary');audioManager.playSpecialCatch()}else{audioManager.playCatch()}if(m.isPowerUp){const powerUpTypes=Object.keys(powerUpManager.powerUpTypes);const randomPowerUp=powerUpTypes[Math.floor(Math.random()*powerUpTypes.length)];powerUpManager.addPowerUp(randomPowerUp)}score+=points*scoreMultiplier;captured+=1;team.atk+=m.ref.atk;team.def+=m.ref.def;team.spd+=m.ref.spd;addCaught(m.ref);setTeamStats();particleSystem.addCatchEffect(m.x+m.w/2,m.y+m.h/2);pokemonPool.release(m);mons.splice(i,1)}}for(let i=mons.length-1;i>=0;i--){const m=mons[i];if(m.y>VH){totalMissed++;lives=Math.max(0,lives-1);renderLives();audioManager.playMiss();pokemonPool.release(m);mons.splice(i,1)}}}const elapsedPlay=(now-startTime)-pausedMs;const left=Math.max(0,ROUND_MS-elapsedPlay);els.time.textContent=fmtTime(left);els.score.textContent=score;els.caught.textContent=captured;if(captured>=TARGET_CATCH){endGame('¡Victoria!',`¡Atrapaste ${captured} Pokémon! ⭐ Puntos: <b>${score}</b><br>Shiny: ${shinyCount} • Legendarios: ${legendaryCount}`)}else if(lives<=0){endGame('Game Over',`Te quedaste sin pokébolas. Capturados: <b>${captured}</b>`)}else if(left<=0){endGame('Game Over',`Se acabó el tiempo. Capturados: <b>${captured}</b>`)}}function render(dt){ctx.clearRect(0,0,VW,VH);drawBackground(dt);for(const m of mons){drawMon(m)}drawTrainer();particleSystem.render(ctx)}function fmtTime(ms){const s=Math.ceil(ms/1000);const m=(s/60)|0;const ss=(s%60).toString().padStart(2,'0');return`${m}:${ss}`}els.startHands.addEventListener('click',async()=>{await handsCtrl.start();control='hands';els.modeChip.textContent='Mano';start('hands')});els.startKb.addEventListener('click',()=>{control='keyboard';els.modeChip.textContent='Teclado';start('keyboard')});els.retry.addEventListener('click',()=>start(control));els.toMenu.addEventListener('click',()=>{state=GameStates.MENU;els.menu.style.display='grid';els.over.style.display='none'});els.toggleMode.addEventListener('click',async()=>{if(control==='keyboard'){await handsCtrl.start();control='hands';els.modeChip.textContent='Mano'}else{control='keyboard';els.modeChip.textContent='Teclado'}});els.toggleDebug.addEventListener('click',()=>{debugVisible=!debugVisible;els.debug.style.display=debugVisible?'block':'none'});els.calibrateBtn.addEventListener('click',()=>{handCalibration.start()});els.soundToggle.addEventListener('click',()=>{const enabled=audioManager.toggle();els.soundToggle.textContent=enabled?'🔊':'🔇'});window.addEventListener('keydown',(e)=>{if(state===GameStates.PLAYING){switch(e.key.toLowerCase()){case'p':paused=!paused;if(paused){pauseStart=performance.now();els.centerMsg.style.display='block';els.centerMsg.textContent='PAUSA - Presiona P para continuar'}else{if(pauseStart){pausedMs+=(performance.now()-pauseStart);pauseStart=null}els.centerMsg.style.display='none'}break;case'c':if(control==='hands'&&handsCtrl.active){handCalibration.start()}break;case'm':audioManager.toggle();els.soundToggle.textContent=audioManager.enabled?'🔊':'🔇';break;case'1':case'2':case'3':case'4':if(e.ctrlKey){const powerUps=Object.keys(powerUpManager.powerUpTypes);const index=parseInt(e.key)-1;if(powerUps[index]){powerUpManager.addPowerUp(powerUps[index])}}break}}});let touchStartX=0;let touchActive=false;canvas.addEventListener('touchstart',(e)=>{e.preventDefault();if(control==='keyboard'||control==='touch'){touchActive=true;touchStartX=e.touches[0].clientX;updateTouchPosition(e.touches[0].clientX)}});canvas.addEventListener('touchmove',(e)=>{e.preventDefault();if(touchActive&&(control==='keyboard'||control==='touch')){updateTouchPosition(e.touches[0].clientX)}});canvas.addEventListener('touchend',(e)=>{e.preventDefault();touchActive=false});function updateTouchPosition(clientX){const rect=canvas.getBoundingClientRect();const normalizedX=(clientX-rect.left)/rect.width;const targetX=30+normalizedX*(VW-60);player.x=Math.max(30,Math.min(VW-30,targetX))}class GameAnalytics{constructor(){this.sessionData={startTime:Date.now(),catches:[],misses:[],powerUpsUsed:[],gesturesDetected:[]}}recordCatch(pokemon,points,wasSpecial){this.sessionData.catches.push({time:Date.now(),pokemon:pokemon.name,points,wasSpecial,isShiny:pokemon.isShiny,isLegendary:pokemon.isLegendary})}recordMiss(){this.sessionData.misses.push({time:Date.now()})}recordPowerUp(type){this.sessionData.powerUpsUsed.push({time:Date.now(),type})}recordGesture(gesture){this.sessionData.gesturesDetected.push({time:Date.now(),gesture})}getStats(){const sessionLength=Date.now()-this.sessionData.startTime;const totalCatches=this.sessionData.catches.length;const totalMisses=this.sessionData.misses.length;const accuracy=totalCatches/(totalCatches+totalMisses)||0;return{sessionLength,totalCatches,totalMisses,accuracy,averagePointsPerCatch:this.sessionData.catches.reduce((sum,c)=>sum+c.points,0)/totalCatches||0,specialCatches:this.sessionData.catches.filter(c=>c.wasSpecial).length,powerUpsUsed:this.sessionData.powerUpsUsed.length,gesturesDetected:this.sessionData.gesturesDetected.length}}}const analytics=new GameAnalytics();class PerformanceMonitor{constructor(){this.frameCount=0;this.lastFpsUpdate=performance.now();this.fps=60;this.frameTime=0}update(currentTime){this.frameCount++;this.frameTime=currentTime-this.lastFrameTime||0;this.lastFrameTime=currentTime;if(currentTime-this.lastFpsUpdate>1000){this.fps=this.frameCount;this.frameCount=0;this.lastFpsUpdate=currentTime;if(this.fps<30&&particleSystem.particles.length>50){particleSystem.particles.splice(0,20)}}}getFPS(){return this.fps}}const perfMonitor=new PerformanceMonitor();class AchievementSystem{constructor(){this.achievements={firstCatch:{name:"Primer Pokémon",description:"Atrapa tu primer Pokémon",unlocked:false},speedDemon:{name:"Demonio de Velocidad",description:"Atrapa 10 Pokémon en 30 segundos",unlocked:false},shinyHunter:{name:"Cazador Shiny",description:"Atrapa un Pokémon shiny",unlocked:false},legendaryMaster:{name:"Maestro Legendario",description:"Atrapa un Pokémon legendario",unlocked:false},perfectionist:{name:"Perfeccionista",description:"Completa un juego sin perder vidas",unlocked:false},gestureWizard:{name:"Mago de Gestos",description:"Activa 5 power-ups con gestos",unlocked:false}};this.tempCounters={fastCatches:[],gestureActivations:0,livesLost:0};this.loadProgress()}loadProgress(){try{const saved=localStorage.getItem('pokemonAchievements');if(saved){const data=JSON.parse(saved);Object.assign(this.achievements,data)}}catch(e){}}saveProgress(){try{localStorage.setItem('pokemonAchievements',JSON.stringify(this.achievements))}catch(e){}}checkAchievement(type,data={}){switch(type){case'catch':if(!this.achievements.firstCatch.unlocked){this.unlock('firstCatch')}const now=Date.now();this.tempCounters.fastCatches.push(now);this.tempCounters.fastCatches=this.tempCounters.fastCatches.filter(t=>now-t<30000);if(this.tempCounters.fastCatches.length>=10&&!this.achievements.speedDemon.unlocked){this.unlock('speedDemon')}break;case'shiny':if(!this.achievements.shinyHunter.unlocked){this.unlock('shinyHunter')}break;case'legendary':if(!this.achievements.legendaryMaster.unlocked){this.unlock('legendaryMaster')}break;case'gesture_powerup':this.tempCounters.gestureActivations++;if(this.tempCounters.gestureActivations>=5&&!this.achievements.gestureWizard.unlocked){this.unlock('gestureWizard')}break;case'life_lost':this.tempCounters.livesLost++;break;case'game_end':if(this.tempCounters.livesLost===0&&captured>=TARGET_CATCH&&!this.achievements.perfectionist.unlocked){this.unlock('perfectionist')}break}}unlock(achievementId){if(this.achievements[achievementId]&&!this.achievements[achievementId].unlocked){this.achievements[achievementId].unlocked=true;this.showAchievementNotification(this.achievements[achievementId]);this.saveProgress();audioManager.playPowerUp()}}showAchievementNotification(achievement){const notification=document.createElement('div');notification.style.cssText=`position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#ffd700,#ff8f00);color:#000;padding:16px 20px;border-radius:12px;font-weight:bold;z-index:10000;box-shadow:0 8px 25px rgba(0,0,0,0.3);animation:slideIn 0.5s ease-out`;notification.innerHTML=`<div style="font-size:14px;">🏆 ¡Logro Desbloqueado!</div><div style="font-size:16px;margin-top:4px;">${achievement.name}</div><div style="font-size:12px;margin-top:2px;opacity:0.8;">${achievement.description}</div>`;document.body.appendChild(notification);setTimeout(()=>{notification.style.animation='slideOut 0.5s ease-in';setTimeout(()=>{document.body.removeChild(notification)},500)},3000)}resetTempCounters(){this.tempCounters={fastCatches:[],gestureActivations:0,livesLost:0}}}const achievementSystem=new AchievementSystem();const achievementStyles=document.createElement('style');achievementStyles.textContent=`@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}`;document.head.appendChild(achievementStyles);function enhancedCollisionCheck(){const trainerRect={x:player.x-player.w/2,y:player.y-player.h,w:player.w,h:player.h+10};for(let i=mons.length-1;i>=0;i--){const m=mons[i];const monRect={x:m.x,y:m.y,w:m.w,h:m.h};if(collide(trainerRect,monRect)){let points=1;let wasSpecial=false;if(m.ref.isShiny){points=5;wasSpecial=true;particleSystem.addSpecialEffect(m.x+m.w/2,m.y+m.h/2,'shiny');audioManager.playSpecialCatch();achievementSystem.checkAchievement('shiny')}else if(m.ref.isLegendary){points=10;wasSpecial=true;particleSystem.addSpecialEffect(m.x+m.w/2,m.y+m.h/2,'legendary');audioManager.playSpecialCatch();achievementSystem.checkAchievement('legendary')}else{audioManager.playCatch()}if(m.isPowerUp){const powerUpTypes=Object.keys(powerUpManager.powerUpTypes);const randomPowerUp=powerUpTypes[Math.floor(Math.random()*powerUpTypes.length)];powerUpManager.addPowerUp(randomPowerUp);analytics.recordPowerUp(randomPowerUp)}score+=points*scoreMultiplier;captured+=1;team.atk+=m.ref.atk;team.def+=m.ref.def;team.spd+=m.ref.spd;addCaught(m.ref);setTeamStats();particleSystem.addCatchEffect(m.x+m.w/2,m.y+m.h/2);analytics.recordCatch(m.ref,points*scoreMultiplier,wasSpecial);achievementSystem.checkAchievement('catch');pokemonPool.release(m);mons.splice(i,1);return true}}return false}function update(dt,now){perfMonitor.update(now);if(control==='hands'){const ok=handsCtrl.active&&handsCtrl.handUp;if(!ok){const timeSinceLastDetection=now-lastHandDetectedTime;if(timeSinceLastDetection>HAND_LOSS_DELAY){if(!paused){paused=true;pauseStart=now;handLostMessageShown=true;els.centerMsg.style.display='block';els.centerMsg.textContent='Por favor levante la mano 🙌'}}}else{lastHandDetectedTime=now;if(paused&&handLostMessageShown){paused=false;handLostMessageShown=false;if(pauseStart){pausedMs+=(now-pauseStart);pauseStart=null}els.centerMsg.style.display='none'}const nx=handsCtrl.normX;const target=30+nx*(VW-60);const currentVelocity=Math.abs(kalmanFilter.getVelocity());const distance=Math.abs(target-player.x);let smoothingFactor;if(currentVelocity>3.0||distance>100){smoothingFactor=0.65}else if(currentVelocity>1.5||distance>50){smoothingFactor=0.45}else{smoothingFactor=0.25}const velocityPrediction=kalmanFilter.predict(dt);const predictedTarget=30+velocityPrediction*(VW-60);const predictionWeight=Math.min(0.3,currentVelocity/10);const finalTarget=target*(1-predictionWeight)+predictedTarget*predictionWeight;player.x+=(finalTarget-player.x)*smoothingFactor;const margin=30;if(player.x<margin){player.x=margin+(player.x-margin)*0.1}else if(player.x>VW-margin){player.x=(VW-margin)+(player.x-(VW-margin))*0.1}}}else{if(paused){paused=false;if(pauseStart){pausedMs+=(now-pauseStart);pauseStart=null}els.centerMsg.style.display='none'}keyboardInput(dt)}player.x=Math.max(30,Math.min(VW-30,player.x));if(!paused){powerUpManager.update(dt);particleSystem.update(dt);const effectiveDt=dt*timeDilation;spawnInterval=Math.max(260,spawnInterval-effectiveDt*3);baseFall=Math.min(500,baseFall+effectiveDt*10);lastSpawn+=effectiveDt*1000;if(lastSpawn>spawnInterval){lastSpawn=0;spawnMon();if(Math.random()<0.35)spawnMon()}const trainerCenter={x:player.x,y:player.y-player.h/2};for(let i=mons.length-1;i>=0;i--){const m=mons[i];m.y+=m.vy*effectiveDt;if(magnetActive){const dist=distance(trainerCenter,{x:m.x+m.w/2,y:m.y+m.h/2});if(dist<150){const pull=200*effectiveDt*(1-dist/150);const dx=trainerCenter.x-(m.x+m.w/2);const dy=trainerCenter.y-(m.y+m.h/2);const len=Math.sqrt(dx*dx+dy*dy);if(len>0){m.x+=(dx/len)*pull;m.y+=(dy/len)*pull}}}}enhancedCollisionCheck();for(let i=mons.length-1;i>=0;i--){const m=mons[i];if(m.y>VH){totalMissed++;lives=Math.max(0,lives-1);renderLives();audioManager.playMiss();analytics.recordMiss();achievementSystem.checkAchievement('life_lost');pokemonPool.release(m);mons.splice(i,1)}}}const elapsedPlay=(now-startTime)-pausedMs;const left=Math.max(0,ROUND_MS-elapsedPlay);els.time.textContent=fmtTime(left);els.score.textContent=score;els.caught.textContent=captured;if(captured>=TARGET_CATCH){achievementSystem.checkAchievement('game_end');endGame('¡Victoria!',`¡Atrapaste ${captured} Pokémon! ⭐ Puntos: <b>${score}</b><br>Shiny: ${shinyCount} • Legendarios: ${legendaryCount}`)}else if(lives<=0){achievementSystem.checkAchievement('game_end');endGame('Game Over',`Te quedaste sin pokébolas. Capturados: <b>${captured}</b>`)}else if(left<=0){achievementSystem.checkAchievement('game_end');endGame('Game Over',`Se acabó el tiempo. Capturados: <b>${captured}</b>`)}}function start(mode){achievementSystem.resetTempCounters();analytics.sessionData={startTime:Date.now(),catches:[],misses:[],powerUpsUsed:[],gesturesDetected:[]};control=mode;state=GameStates.PLAYING;score=0;captured=0;lives=MAX_LIVES;shinyCount=0;legendaryCount=0;totalMissed=0;scoreMultiplier=1;timeDilation=1.0;magnetActive=false;lastHandDetectedTime=performance.now();handLostMessageShown=false;team.atk=team.def=team.spd=0;els.list.innerHTML='';renderLives();setTeamStats();spawnInterval=900;baseFall=120;lastSpawn=0;mons.length=0;startTime=performance.now();paused=false;pauseStart=null;pausedMs=0;powerUpManager.activePowerUps.clear();powerUpManager.updateUI();particleSystem.particles.length=0;els.menu.style.display='none';els.over.style.display='none';els.shinyCount.textContent='0';els.legendaryCount.textContent='0';kalmanFilter.reset();handPositionBuffer.clear();advancedHandController.frameSkipCounter=0;advancedHandController.maxFrameSkip=1;advancedHandController.lastProcessTime=0;fit()}function onResults(res){const W=els.handsCanvas.width,H=els.handsCanvas.height;htx.clearRect(0,0,W,H);if(res.image)htx.drawImage(res.image,0,0,W,H);const list=res.multiHandLandmarks||[];if(list.length>=1){const lm=list[0];const idx=[0,5,9,13,17];let x=0,y=0;for(const i of idx){x+=lm[i].x;y+=lm[i].y}x/=idx.length;y/=idx.length;let raw=x;if(handsCtrl.invertX)raw=1-raw;if(handCalibration.isCalibrating){handCalibration.calibrate(raw)}else if(handCalibration.maxX>handCalibration.minX){raw=handCalibration.normalize(raw)}handsCtrl.normX=kalmanFilter.update(raw);handsCtrl.handUp=y<0.6;gestureDetector.addPosition(x,y);const gesture=gestureDetector.detectSwipe();if(gesture){showGestureHint(gesture);analytics.recordGesture(gesture);if(state===GameStates.PLAYING&&Math.random()<0.3){const powerUpTypes=Object.keys(powerUpManager.powerUpTypes);const randomPowerUp=powerUpTypes[Math.floor(Math.random()*powerUpTypes.length)];powerUpManager.addPowerUp(randomPowerUp);achievementSystem.checkAchievement('gesture_powerup')}}drawConnectors(htx,lm,HAND_CONNECTIONS,{color:'#6ef',lineWidth:2});drawLandmarks(htx,lm,{color:'#fff',lineWidth:1})}else{handsCtrl.handUp=false}}renderLives();fit();els.highScore.textContent=GameData.getHighScore();if(window.location.search.includes('debug')){const debugPanel=document.createElement('div');debugPanel.style.cssText=`position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:white;padding:10px;border-radius:8px;font-family:monospace;font-size:12px;z-index:9999;min-width:200px`;debugPanel.id='debugPanel';document.body.appendChild(debugPanel);setInterval(()=>{if(document.getElementById('debugPanel')){const stats=analytics.getStats();document.getElementById('debugPanel').innerHTML=`<div><strong>Debug Info</strong></div><div>FPS: ${perfMonitor.getFPS()}</div><div>Particles: ${particleSystem.particles.length}</div><div>Pokémon: ${mons.length}</div><div>Accuracy: ${(stats.accuracy*100).toFixed(1)}%</div><div>Skill Level: ${(difficultyManager.playerSkill*100).toFixed(1)}%</div><div>Hand X: ${handsCtrl.normX.toFixed(3)}</div><div>Hand Velocity: ${kalmanFilter.getVelocity().toFixed(3)}</div><div>Frame Skip: ${advancedHandController.maxFrameSkip}</div><div>Position Buffer: ${handPositionBuffer.positions.length}</div><div>Time Dilation: ${timeDilation.toFixed(2)}</div><div>Active Power-ups: ${powerUpManager.activePowerUps.size}</div>`}},100)}})();
+  <div id="layout">
+    <div id="left">
+      <canvas id="game"></canvas>
+
+      <div class="hud">
+        <div class="top">
+          <div class="badge">
+            
+          </div>
+          <div class="row">
+            <span class="chip">Modo: <b id="modeChip">Mano</b></span>
+            <span class="chip">Skill: <b id="skillChip">50%</b></span>
+            <button class="btn ghost" id="toggleDebug">Ver cámara</button>
+            <button class="btn ghost" id="toggleMode">Usar teclado</button>
+            <button class="btn ghost" id="calibrateBtn" style="display:none">Calibrar</button>
+          </div>
+        </div>
+        
+        <div class="powerup-indicator" id="powerups"></div>
+        <div class="gesture-hint" id="gestureHint">🖐 Gesto detectado</div>
+      </div>
+
+      <!-- Calibration overlay -->
+      <div class="calibration" id="calibration">
+        <div class="cal-panel">
+          <h3>Calibración de Mano</h3>
+          <p>Mueve tu mano de izquierda a derecha por toda la pantalla</p>
+          <div class="cal-progress">
+            <div class="cal-bar" id="calProgress"></div>
+          </div>
+          <p id="calText">Progreso: 0%</p>
+        </div>
+      </div>
+
+      <!-- Menu -->
+      <div class="overlay" id="menu">
+        <div class="panel">
+          <h1 style="margin:0 0 10px">Atrapa el Pokémon</h1>
+          <p style="margin:0 0 14px;color:var(--muted)">Atrapa <b>35</b> antes de 1 minuto para ganar. Tienes <b>22 pokébolas</b> (vidas). Si un Pokémon toca el piso, pierdes una.</p>
+          <div class="row">
+            <button class="btn" id="startHands">Permitir cámara (mano) & Jugar</button>
+            <button class="btn ghost" id="startKb">Jugar con teclado</button>
+          </div>
+          <p style="margin-top:10px;color:var(--muted)">Levanta una <b>mano</b> visible a cámara y muévela izquierda↔derecha para controlar la canasta.</p>
+        </div>
+      </div>
+
+      <!-- Game Over / Victory -->
+      <div class="overlay" id="over" style="display:none">
+        <div class="panel">
+          <h2 id="overTitle">Game Over</h2>
+          <p id="overMsg">¡Se acabó el tiempo!</p>
+          <div class="row">
+            <button class="btn" id="retry">Reintentar</button>
+            <button class="btn ghost" id="toMenu">Menú</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sound-toggle" id="soundToggle">🔊</div>
+      <div id="debug"><canvas id="handsCanvas" width="320" height="180"></canvas></div>
+      <div class="centerMsg" id="centerMsg">Por favor levante la mano 🙌</div>
+      <video id="webcam" autoplay playsinline muted></video>
+    </div>
+
+    <aside id="side">
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px">
+          <div class="statbar">
+            <div class="stat">⏱ <b id="time">03:00</b></div>
+            <div class="stat">⭐ Puntos: <b id="score">0</b></div>
+            <div class="stat">🎯 Capturados: <b id="caught">0</b>/35</div>
+          </div>
+        </div>
+        <div style="margin-top:8px" class="balls" id="lives"></div>
+      </div>
+      
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+          <span style="font-size:12px; color:var(--muted)">Récord Personal</span>
+          <span class="highscore" id="highScore">0</span>
+        </div>
+        <div class="statbar">
+          <div class="stat">⚔️ Atk: <b id="atk">0</b></div>
+          <div class="stat">🛡 Def: <b id="def">0</b></div>
+          <div class="stat">💨 Spd: <b id="spd">0</b></div>
+        </div>
+      </div>
+      
+      <div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px">Multiplicadores Activos</div>
+        <div class="statbar">
+          <div class="stat">📈 Puntos: <b id="multiplier">x1</b></div>
+          <div class="stat">🏀 Canasta: <b id="basketSize">Normal</b></div>
+        </div>
+      </div>
+      
+      <div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px">Especiales Capturados</div>
+        <div class="statbar">
+          <div class="stat">✨ Shiny: <b id="shinyCount">0</b></div>
+          <div class="stat">🔥 Legendarios: <b id="legendaryCount">0</b></div>
+        </div>
+      </div>
+      
+      <div class="list" id="list"></div>
+    </aside>
+  </div>
+
+  <script>
+  (()=>{
+    // ====== Game States ======
+    const GameStates = {
+      MENU: 'menu',
+      PLAYING: 'playing',
+      PAUSED: 'paused',
+      CALIBRATING: 'calibrating',
+      GAME_OVER: 'game_over'
+    };
+
+    // ====== Game Data Persistence ======
+    class GameData {
+      static save(data) {
+        try {
+          localStorage.setItem('pokemonCatcherStats', JSON.stringify(data));
+        } catch(e) {}
+      }
+      
+      static load() {
+        try {
+          return JSON.parse(localStorage.getItem('pokemonCatcherStats') || '{}');
+        } catch(e) {
+          return {};
+        }
+      }
+      
+      static updateHighScore(score) {
+        const data = this.load();
+        data.highScore = Math.max(data.highScore || 0, score);
+        data.totalGames = (data.totalGames || 0) + 1;
+        data.totalCaught = (data.totalCaught || 0) + captured;
+        this.save(data);
+        return data.highScore;
+      }
+      
+      static getHighScore() {
+        return this.load().highScore || 0;
+      }
+    }
+
+    // ====== Audio Manager ======
+    class AudioManager {
+      constructor() {
+        this.enabled = true;
+        this.context = null;
+        this.sounds = {};
+        this.initSynthSounds();
+      }
+      
+      initSynthSounds() {
+        if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+          this.context = new (AudioContext || webkitAudioContext)();
+        }
+      }
+      
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+      
+      playTone(frequency, duration, type = 'sine') {
+        if (!this.enabled || !this.context) return;
+        
+        try {
+          const oscillator = this.context.createOscillator();
+          const gainNode = this.context.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(this.context.destination);
+          
+          oscillator.frequency.setValueAtTime(frequency, this.context.currentTime);
+          oscillator.type = type;
+          
+          gainNode.gain.setValueAtTime(0.1, this.context.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
+          
+          oscillator.start(this.context.currentTime);
+          oscillator.stop(this.context.currentTime + duration);
+        } catch(e) {}
+      }
+      
+      playCatch() {
+        this.playTone(523.25, 0.2, 'square'); // C5
+        setTimeout(() => this.playTone(659.25, 0.15, 'square'), 100); // E5
+      }
+      
+      playMiss() {
+        this.playTone(196, 0.3, 'sawtooth'); // G3
+      }
+      
+      playPowerUp() {
+        this.playTone(440, 0.1, 'sine'); // A4
+        setTimeout(() => this.playTone(554.37, 0.1, 'sine'), 100); // C#5
+        setTimeout(() => this.playTone(659.25, 0.2, 'sine'), 200); // E5
+      }
+      
+      playSpecialCatch() {
+        for(let i = 0; i < 5; i++) {
+          setTimeout(() => this.playTone(440 + i * 110, 0.1, 'sine'), i * 50);
+        }
+      }
+    }
+
+    // ====== Enhanced Kalman Filter for Hand Smoothing ======
+    class EnhancedKalmanFilter {
+      constructor(processNoise = 0.008, measurementNoise = 0.03) {
+        this.processNoise = processNoise;
+        this.measurementNoise = measurementNoise;
+        this.estimate = 0;
+        this.velocity = 0;
+        this.errorCovariance = 1;
+        this.velocityCovariance = 1;
+        this.lastTime = performance.now();
+        this.adaptiveMode = true;
+        this.velocityHistory = [];
+        this.maxVelocityHistory = 5;
+      }
+      
+      update(measurement, currentTime = performance.now()) {
+        const deltaTime = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+        
+        // Predict phase with velocity
+        const predictedEstimate = this.estimate + this.velocity * deltaTime;
+        const predictedError = this.errorCovariance + this.processNoise * deltaTime;
+        const predictedVelocityError = this.velocityCovariance + this.processNoise * deltaTime;
+        
+        // Adaptive noise based on velocity
+        let adaptedMeasurementNoise = this.measurementNoise;
+        if (this.adaptiveMode && Math.abs(this.velocity) > 2.0) {
+          adaptedMeasurementNoise *= 0.6; // Reduce noise for fast movements
+        }
+        
+        // Update phase
+        const kalmanGain = predictedError / (predictedError + adaptedMeasurementNoise);
+        const velocityGain = predictedVelocityError / (predictedVelocityError + adaptedMeasurementNoise);
+        
+        // Calculate velocity from measurement difference
+        const measuredVelocity = deltaTime > 0 ? (measurement - this.estimate) / deltaTime : 0;
+        
+        // Update estimates
+        this.estimate = predictedEstimate + kalmanGain * (measurement - predictedEstimate);
+        this.velocity = this.velocity + velocityGain * (measuredVelocity - this.velocity);
+        
+        // Update covariances
+        this.errorCovariance = (1 - kalmanGain) * predictedError;
+        this.velocityCovariance = (1 - velocityGain) * predictedVelocityError;
+        
+        // Track velocity history for acceleration prediction
+        this.velocityHistory.push(this.velocity);
+        if (this.velocityHistory.length > this.maxVelocityHistory) {
+          this.velocityHistory.shift();
+        }
+        
+        return this.estimate;
+      }
+      
+      predict(deltaTime) {
+        // Predict next position based on velocity and acceleration
+        const acceleration = this.getAcceleration();
+        return this.estimate + this.velocity * deltaTime + 0.5 * acceleration * deltaTime * deltaTime;
+      }
+      
+      getAcceleration() {
+        if (this.velocityHistory.length < 2) return 0;
+        
+        const recent = this.velocityHistory.slice(-2);
+        return recent[1] - recent[0];
+      }
+      
+      getVelocity() {
+        return this.velocity;
+      }
+      
+      reset() {
+        this.estimate = 0;
+        this.velocity = 0;
+        this.velocityHistory = [];
+        this.errorCovariance = 1;
+        this.velocityCovariance = 1;
+      }
+    }
+
+    // ====== Advanced Hand Position Buffer ======
+    class HandPositionBuffer {
+      constructor(maxSize = 10) {
+        this.positions = [];
+        this.maxSize = maxSize;
+        this.lastValidTime = 0;
+        this.missedFrameThreshold = 50; // ms
+      }
+      
+      addPosition(x, y, timestamp = performance.now()) {
+        this.positions.push({
+          x: x,
+          y: y,
+          timestamp: timestamp,
+          confidence: 1.0
+        });
+        
+        if (this.positions.length > this.maxSize) {
+          this.positions.shift();
+        }
+        
+        this.lastValidTime = timestamp;
+      }
+      
+      interpolatePosition(currentTime) {
+        if (this.positions.length < 2) return null;
+        
+        const timeSinceLastFrame = currentTime - this.lastValidTime;
+        
+        // If we haven't missed any frames, return the latest position
+        if (timeSinceLastFrame < this.missedFrameThreshold) {
+          return this.positions[this.positions.length - 1];
+        }
+        
+        // Interpolate based on the last two positions
+        const recent = this.positions.slice(-2);
+        const deltaTime = recent[1].timestamp - recent[0].timestamp;
+        const velocity = {
+          x: deltaTime > 0 ? (recent[1].x - recent[0].x) / deltaTime : 0,
+          y: deltaTime > 0 ? (recent[1].y - recent[0].y) / deltaTime : 0
+        };
+        
+        // Predict position based on velocity
+        const extrapolationTime = timeSinceLastFrame;
+        return {
+          x: recent[1].x + velocity.x * extrapolationTime,
+          y: recent[1].y + velocity.y * extrapolationTime,
+          timestamp: currentTime,
+          confidence: Math.max(0.1, 1.0 - timeSinceLastFrame / 200) // Reduce confidence over time
+        };
+      }
+      
+      getVelocity() {
+        if (this.positions.length < 2) return { x: 0, y: 0 };
+        
+        const recent = this.positions.slice(-2);
+        const deltaTime = recent[1].timestamp - recent[0].timestamp;
+        
+        return {
+          x: deltaTime > 0 ? (recent[1].x - recent[0].x) / deltaTime : 0,
+          y: deltaTime > 0 ? (recent[1].y - recent[0].y) / deltaTime : 0
+        };
+      }
+      
+      getSmoothedPosition(smoothingFactor = 0.7) {
+        if (this.positions.length === 0) return null;
+        if (this.positions.length === 1) return this.positions[0];
+        
+        // Apply exponential smoothing to recent positions
+        let smoothed = this.positions[0];
+        for (let i = 1; i < this.positions.length; i++) {
+          const current = this.positions[i];
+          smoothed = {
+            x: smoothed.x * (1 - smoothingFactor) + current.x * smoothingFactor,
+            y: smoothed.y * (1 - smoothingFactor) + current.y * smoothingFactor,
+            timestamp: current.timestamp,
+            confidence: current.confidence
+          };
+        }
+        
+        return smoothed;
+      }
+      
+      clear() {
+        this.positions = [];
+        this.lastValidTime = 0;
+      }
+    }
+
+    // ====== Enhanced Gesture Detector ======
+    class GestureDetector {
+      constructor() {
+        this.positions = [];
+        this.maxHistory = 15;
+        this.lastGesture = null;
+        this.gestureTimeout = 0;
+        this.minimumSwipeDistance = 0.15;
+        this.maximumSwipeTime = 400;
+      }
+      
+      addPosition(x, y) {
+        this.positions.push({x, y, time: performance.now()});
+        if(this.positions.length > this.maxHistory) {
+          this.positions.shift();
+        }
+      }
+      
+      detectSwipe() {
+        if(this.positions.length < 6) return null;
+        
+        const recent = this.positions.slice(-6);
+        const deltaX = recent[5].x - recent[0].x;
+        const deltaTime = recent[5].time - recent[0].time;
+        
+        // More sensitive detection for faster movements
+        if(Math.abs(deltaX) > this.minimumSwipeDistance && deltaTime < this.maximumSwipeTime) {
+          const gesture = deltaX > 0 ? 'swipe_right' : 'swipe_left';
+          if(gesture !== this.lastGesture || performance.now() - this.gestureTimeout > 800) {
+            this.lastGesture = gesture;
+            this.gestureTimeout = performance.now();
+            return gesture;
+          }
+        }
+        return null;
+      }
+      
+      getSwipeVelocity() {
+        if(this.positions.length < 3) return 0;
+        
+        const recent = this.positions.slice(-3);
+        const deltaX = recent[2].x - recent[0].x;
+        const deltaTime = recent[2].time - recent[0].time;
+        
+        return deltaTime > 0 ? Math.abs(deltaX) / (deltaTime / 1000) : 0;
+      }
+    }
+
+    // ====== Hand Calibration ======
+    class HandCalibration {
+      constructor() {
+        this.minX = 1;
+        this.maxX = 0;
+        this.calibrationFrames = 0;
+        this.maxFrames = 180; // 3 seconds at 60fps
+        this.isCalibrating = false;
+      }
+      
+      start() {
+        this.minX = 1;
+        this.maxX = 0;
+        this.calibrationFrames = 0;
+        this.isCalibrating = true;
+        els.calibration.style.display = 'grid';
+      }
+      
+      calibrate(handX) {
+        if(!this.isCalibrating) return false;
+        
+        this.minX = Math.min(this.minX, handX);
+        this.maxX = Math.max(this.maxX, handX);
+        this.calibrationFrames++;
+        
+        const progress = (this.calibrationFrames / this.maxFrames) * 100;
+        els.calProgress.style.width = progress + '%';
+        els.calText.textContent = `Progreso: ${Math.round(progress)}%`;
+        
+        if(this.calibrationFrames >= this.maxFrames) {
+          this.isCalibrating = false;
+          els.calibration.style.display = 'none';
+          return true;
+        }
+        return false;
+      }
+      
+      normalize(x) {
+        if(this.maxX <= this.minX) return 0.5;
+        return (x - this.minX) / (this.maxX - this.minX);
+      }
+    }
+
+    // ====== Particle System ======
+    class ParticleSystem {
+      constructor() {
+        this.particles = [];
+      }
+      
+      addCatchEffect(x, y, color = '#7c5cff') {
+        for(let i = 0; i < 12; i++) {
+          this.particles.push({
+            x, y,
+            vx: (Math.random() - 0.5) * 300,
+            vy: -Math.random() * 200 - 50,
+            life: 1.0,
+            maxLife: 1.0,
+            size: 2 + Math.random() * 4,
+            color: color
+          });
+        }
+      }
+      
+      addSpecialEffect(x, y, type) {
+        const colors = {
+          shiny: ['#ffeb3b', '#ffc107', '#ff9800'],
+          legendary: ['#ff6b6b', '#ff5722', '#e91e63'],
+          powerup: ['#4caf50', '#8bc34a', '#cddc39']
+        };
+        
+        const colorSet = colors[type] || colors.powerup;
+        
+        for(let i = 0; i < 20; i++) {
+          this.particles.push({
+            x: x + (Math.random() - 0.5) * 40,
+            y: y + (Math.random() - 0.5) * 40,
+            vx: (Math.random() - 0.5) * 200,
+            vy: -Math.random() * 150 - 30,
+            life: 1.5,
+            maxLife: 1.5,
+            size: 3 + Math.random() * 6,
+            color: colorSet[Math.floor(Math.random() * colorSet.length)]
+          });
+        }
+      }
+      
+      update(dt) {
+        for(let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 300 * dt; // gravity
+          p.life -= dt;
+          
+          if(p.life <= 0) {
+            this.particles.splice(i, 1);
+          }
+        }
+      }
+      
+      render(ctx) {
+        ctx.save();
+        for(const p of this.particles) {
+          const alpha = p.life / p.maxLife;
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    // ====== Power-up System ======
+    class PowerUpManager {
+      constructor() {
+        this.activePowerUps = new Map();
+        this.powerUpTypes = {
+          SLOW_TIME: { 
+            name: '🐌 Tiempo Lento', 
+            duration: 8000, 
+            color: '#4fc3f7',
+            activate: () => { timeDilation = 0.5; },
+            deactivate: () => { timeDilation = 1.0; }
+          },
+          BIGGER_BASKET: { 
+            name: '🏀 Canasta Grande', 
+            duration: 10000, 
+            color: '#66bb6a',
+            activate: () => { player.w = originalBasketWidth * 1.8; },
+            deactivate: () => { player.w = originalBasketWidth; }
+          },
+          DOUBLE_POINTS: { 
+            name: '💎 Puntos x2', 
+            duration: 12000, 
+            color: '#ffd54f',
+            activate: () => { scoreMultiplier = 2; },
+            deactivate: () => { scoreMultiplier = 1; }
+          },
+          MAGNET: {
+            name: '🧲 Imán', 
+            duration: 6000, 
+            color: '#e57373',
+            activate: () => { magnetActive = true; },
+            deactivate: () => { magnetActive = false; }
+          }
+        };
+      }
+      
+      addPowerUp(type) {
+        if(this.activePowerUps.has(type)) {
+          // Extend duration if already active
+          this.activePowerUps.get(type).remaining = this.powerUpTypes[type].duration;
+          return;
+        }
+        
+        const powerUp = this.powerUpTypes[type];
+        powerUp.activate();
+        this.activePowerUps.set(type, {
+          remaining: powerUp.duration,
+          type: powerUp
+        });
+        
+        audioManager.playPowerUp();
+        particleSystem.addSpecialEffect(player.x, player.y - 50, 'powerup');
+        this.updateUI();
+      }
+      
+      update(dt) {
+        for(const [type, powerUp] of this.activePowerUps) {
+          powerUp.remaining -= dt * 1000;
+          if(powerUp.remaining <= 0) {
+            powerUp.type.deactivate();
+            this.activePowerUps.delete(type);
+          }
+        }
+        this.updateUI();
+      }
+      
+      updateUI() {
+        const container = els.powerups;
+        container.innerHTML = '';
+        
+        for(const [type, powerUp] of this.activePowerUps) {
+          const div = document.createElement('div');
+          div.className = 'powerup';
+          div.style.borderLeftColor = powerUp.type.color;
+          div.innerHTML = `${powerUp.type.name} <br><small>${Math.ceil(powerUp.remaining/1000)}s</small>`;
+          container.appendChild(div);
+        }
+        
+        // Update multiplier display
+        els.multiplier.textContent = `x${scoreMultiplier}`;
+        els.basketSize.textContent = player.w > originalBasketWidth ? 'Grande' : 'Normal';
+      }
+    }
+
+    // ====== Difficulty Manager ======
+    class DifficultyManager {
+      constructor() {
+        this.playerSkill = 0.5;
+        this.recentPerformance = [];
+        this.adaptationRate = 0.1;
+      }
+      
+      updateSkill(caught, missed, totalTime) {
+        const total = caught + missed;
+        if(total === 0) return;
+        
+        const accuracy = caught / total;
+        const timeBonus = Math.max(0, 1 - (totalTime / ROUND_MS));
+        const performance = accuracy * 0.8 + timeBonus * 0.2;
+        
+        this.recentPerformance.push(performance);
+        if(this.recentPerformance.length > 10) {
+          this.recentPerformance.shift();
+        }
+        
+        const avgPerformance = this.recentPerformance.reduce((a, b) => a + b, 0) / this.recentPerformance.length;
+        this.playerSkill = this.playerSkill * (1 - this.adaptationRate) + avgPerformance * this.adaptationRate;
+        
+        // Adjust game parameters
+        this.adjustDifficulty();
+        
+        // Update UI
+        els.skillChip.textContent = Math.round(this.playerSkill * 100) + '%';
+      }
+      
+      adjustDifficulty() {
+        const baseSpawnInterval = 900;
+        const baseFallSpeed = 120;
+        
+        // Easier for low skill, harder for high skill
+        const skillFactor = (this.playerSkill - 0.5) * 2; // -1 to 1
+        
+        spawnInterval = Math.max(300, baseSpawnInterval - skillFactor * 300);
+        baseFall = Math.max(80, baseFallSpeed + skillFactor * 100);
+      }
+    }
+
+    // ====== Object Pools ======
+    class ObjectPool {
+      constructor(createFn, resetFn) {
+        this.objects = [];
+        this.createFn = createFn;
+        this.resetFn = resetFn;
+      }
+      
+      get() {
+        if(this.objects.length > 0) {
+          return this.objects.pop();
+        }
+        return this.createFn();
+      }
+      
+      release(obj) {
+        this.resetFn(obj);
+        this.objects.push(obj);
+      }
+    }
+
+    // ====== Canvas & DPR ======
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    let resizeTimeout;
+    
+    function fit(){
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const right = document.getElementById('side');
+        const sideW = right?.offsetWidth || 320;
+        const gap = 16;
+        const pad = 16;
+        const maxW = Math.min(window.innerWidth - sideW - gap - pad*2, 1200);
+        const maxH = Math.min(window.innerHeight - pad*2, 760);
+        let w = Math.max(640, maxW), h = Math.round(w*9/16);
+        if (h > maxH){ h = maxH; w = Math.round(h*16/9); }
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        VW = w;
+        VH = h;
+        player.y = VH - 80;
+      }, 100);
+    }
+
+    let VW = 0, VH = 0;
+    window.addEventListener('resize', fit);
+
+    // ====== UI refs ======
+    const els = {
+      menu: document.getElementById('menu'),
+      over: document.getElementById('over'),
+      overTitle: document.getElementById('overTitle'),
+      overMsg: document.getElementById('overMsg'),
+      startHands: document.getElementById('startHands'),
+      startKb: document.getElementById('startKb'),
+      retry: document.getElementById('retry'),
+      toMenu: document.getElementById('toMenu'),
+      time: document.getElementById('time'),
+      score: document.getElementById('score'),
+      caught: document.getElementById('caught'),
+      atk: document.getElementById('atk'),
+      def: document.getElementById('def'),
+      spd: document.getElementById('spd'),
+      list: document.getElementById('list'),
+      lives: document.getElementById('lives'),
+      modeChip: document.getElementById('modeChip'),
+      toggleMode: document.getElementById('toggleMode'),
+      toggleDebug: document.getElementById('toggleDebug'),
+      handsCanvas: document.getElementById('handsCanvas'),
+      webcam: document.getElementById('webcam'),
+      debug: document.getElementById('debug'),
+      centerMsg: document.getElementById('centerMsg'),
+      calibration: document.getElementById('calibration'),
+      calProgress: document.getElementById('calProgress'),
+      calText: document.getElementById('calText'),
+      calibrateBtn: document.getElementById('calibrateBtn'),
+      skillChip: document.getElementById('skillChip'),
+      powerups: document.getElementById('powerups'),
+      gestureHint: document.getElementById('gestureHint'),
+      soundToggle: document.getElementById('soundToggle'),
+      highScore: document.getElementById('highScore'),
+      multiplier: document.getElementById('multiplier'),
+      basketSize: document.getElementById('basketSize'),
+      shinyCount: document.getElementById('shinyCount'),
+      legendaryCount: document.getElementById('legendaryCount')
+    };
+
+    // ====== State ======
+    const ROUND_MS = 1 * 60 * 1000; // 1 mins
+    const TARGET_CATCH = 35;
+    const MAX_LIVES = 22;
+    let state = GameStates.MENU;
+    let control = 'hands';
+    let score = 0, captured = 0, lives = MAX_LIVES;
+    let startTime = 0;
+    let paused = false, pauseStart = null, pausedMs = 0;
+    const team = {atk: 0, def: 0, spd: 0};
+    let shinyCount = 0, legendaryCount = 0;
+    let scoreMultiplier = 1;
+    let timeDilation = 1.0;
+    let magnetActive = false;
+    
+    // Hand detection delay system
+    let lastHandDetectedTime = 0;
+    const HAND_LOSS_DELAY = 1000; // 1 second delay before showing message
+    let handLostMessageShown = false;
+
+    // ====== Player & Entities ======
+    const originalBasketWidth = 100;
+    const player = {x: 0, y: 0, w: originalBasketWidth, h: 26, speed: 14};
+    const mons = [];
+    let lastSpawn = 0, spawnInterval = 900;
+    let baseFall = 120;
+    let totalMissed = 0;
+
+    // ====== Initialize Systems ======
+    const audioManager = new AudioManager();
+    const particleSystem = new ParticleSystem();
+    const powerUpManager = new PowerUpManager();
+    const difficultyManager = new DifficultyManager();
+    const kalmanFilter = new EnhancedKalmanFilter(0.008, 0.03);
+    const gestureDetector = new GestureDetector();
+    const handCalibration = new HandCalibration();
+    const handPositionBuffer = new HandPositionBuffer(15);
+    
+    // ====== Advanced Hand Controller with Performance Optimization ======
+    const advancedHandController = {
+      frameSkipCounter: 0,
+      maxFrameSkip: 1, // Process every other frame for 30fps effective rate
+      lastProcessTime: 0,
+      targetFrameTime: 1000/60, // Target 60fps processing
+      smoothingEnabled: true,
+      predictionEnabled: true,
+      
+      // Dynamic optimization based on performance
+      optimizePerformance() {
+        const avgFPS = perfMonitor?.getFPS() || 60;
+        const currentParticles = particleSystem?.particles.length || 0;
+        
+        // Adjust frame skipping based on performance
+        if (avgFPS < 45) {
+          this.maxFrameSkip = Math.min(3, this.maxFrameSkip + 1);
+          this.predictionEnabled = true; // Enable prediction to compensate
+        } else if (avgFPS > 55 && this.maxFrameSkip > 1) {
+          this.maxFrameSkip = Math.max(1, this.maxFrameSkip - 1);
+        }
+        
+        // Adjust Kalman filter parameters for performance
+        if (avgFPS < 30) {
+          kalmanFilter.adaptiveMode = false; // Disable adaptive mode for stability
+        } else {
+          kalmanFilter.adaptiveMode = true;
+        }
+        
+        // Reduce particles if performance is poor
+        if (avgFPS < 35 && currentParticles > 30) {
+          particleSystem.particles.splice(0, 10);
+        }
+      }
+    };
+    
+    // Run performance optimization every 5 seconds
+    setInterval(() => {
+      if (typeof perfMonitor !== 'undefined') {
+        advancedHandController.optimizePerformance();
+      }
+    }, 5000);
+
+    // ====== Pokemon Pool ======
+    const pokemonPool = new ObjectPool(
+      () => ({}),
+      (mon) => {
+        Object.keys(mon).forEach(key => delete mon[key]);
+      }
+    );
+
+    // ====== Keyboard ======
+    const keys = new Set();
+    window.addEventListener('keydown', e => keys.add(e.key.toLowerCase()));
+    window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+    
+    function keyboardInput(dt) {
+      const L = keys.has('arrowleft') || keys.has('a');
+      const R = keys.has('arrowright') || keys.has('d');
+      if(L && !R) player.x -= player.speed * 60 * dt;
+      if(R && !L) player.x += player.speed * 60 * dt;
+    }
+
+    // ====== Hand Controller ======
+    const htx = els.handsCanvas.getContext('2d');
+    const handsCtrl = {
+      active: false,
+      normX: 0.5,
+      handUp: false,
+      invertX: true,
+      
+      async start() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: {ideal: 640},
+              height: {ideal: 360},
+              facingMode: 'user'
+            }
+          });
+          els.webcam.srcObject = stream;
+          await els.webcam.play();
+          
+          const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+          });
+          hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 0, // Fastest model for real-time performance
+            minDetectionConfidence: 0.4, // Balanced for accuracy vs speed
+            minTrackingConfidence: 0.2,  // Lower for better fast movement tracking
+            staticImageMode: false,      // Essential for video tracking
+            useCpuInference: false       // Use GPU acceleration if available
+          });
+          hands.onResults(onResults);
+          
+          const cam = new Camera(els.webcam, {
+            width: 640,
+            height: 360,
+            onFrame: async () => {
+              await hands.send({image: els.webcam});
+            }
+          });
+          cam.start();
+          this.active = true;
+          this.lastValidTime = performance.now(); // Inicializar tiempo
+          
+          // Show calibration button
+          els.calibrateBtn.style.display = 'block';
+          
+        } catch(e) {
+          alert('No se pudo iniciar detección de mano: ' + e.message);
+          this.active = false;
+        }
+      }
+    };
+
+    function onResults(res) {
+      const currentTime = performance.now();
+      const W = els.handsCanvas.width, H = els.handsCanvas.height;
+      
+      // Frame skipping for performance optimization
+      advancedHandController.frameSkipCounter++;
+      const shouldProcess = advancedHandController.frameSkipCounter >= advancedHandController.maxFrameSkip;
+      
+      if (shouldProcess) {
+        advancedHandController.frameSkipCounter = 0;
+        advancedHandController.lastProcessTime = currentTime;
+      }
+      
+      // Always clear and draw the video frame
+      htx.clearRect(0, 0, W, H);
+      if(res.image) htx.drawImage(res.image, 0, 0, W, H);
+      
+      const list = res.multiHandLandmarks || [];
+      
+      if(list.length >= 1) {
+        const lm = list[0];
+        
+        // Enhanced palm center calculation with weighted average
+        const palmIndices = [0, 5, 9, 13, 17];
+        const wristWeight = 2.0; // Give more weight to wrist for stability
+        let x = 0, y = 0, totalWeight = 0;
+        
+        for(let i = 0; i < palmIndices.length; i++) {
+          const idx = palmIndices[i];
+          const weight = idx === 0 ? wristWeight : 1.0; // Wrist gets more weight
+          x += lm[idx].x * weight;
+          y += lm[idx].y * weight;
+          totalWeight += weight;
+        }
+        x /= totalWeight;
+        y /= totalWeight;
+        
+        // Store raw position in buffer for interpolation
+        let raw = x;
+        if(handsCtrl.invertX) raw = 1 - raw;
+        
+        // Add to position buffer
+        handPositionBuffer.addPosition(raw, y, currentTime);
+        
+        if (shouldProcess) {
+          // Calibration
+          if(handCalibration.isCalibrating) {
+            handCalibration.calibrate(raw);
+          } else if(handCalibration.maxX > handCalibration.minX) {
+            raw = handCalibration.normalize(raw);
+          }
+          
+          // Apply enhanced Kalman filter with temporal information
+          handsCtrl.normX = kalmanFilter.update(raw, currentTime);
+          
+          // Enhanced hand up detection with stability check
+          const handUpThreshold = 0.65;
+          const currentHandUp = y < handUpThreshold;
+          
+          // Use temporal consistency to avoid jitter
+          if (!handsCtrl.handUp && currentHandUp) {
+            // Hand just went up - verify with buffer
+            const recent = handPositionBuffer.positions.slice(-3);
+            const avgY = recent.reduce((sum, pos) => sum + pos.y, 0) / recent.length;
+            handsCtrl.handUp = avgY < handUpThreshold;
+          } else if (handsCtrl.handUp && !currentHandUp) {
+            // Hand going down - add some hysteresis
+            handsCtrl.handUp = y < (handUpThreshold + 0.1);
+          } else {
+            handsCtrl.handUp = currentHandUp;
+          }
+          
+          // Enhanced gesture detection
+          gestureDetector.addPosition(x, y);
+          const gesture = gestureDetector.detectSwipe();
+          if(gesture) {
+            const swipeVelocity = gestureDetector.getSwipeVelocity();
+            showGestureHint(gesture, swipeVelocity);
+            
+            // Trigger power-ups with gestures during gameplay
+            if(state === GameStates.PLAYING && Math.random() < 0.3) {
+              const powerUpTypes = Object.keys(powerUpManager.powerUpTypes);
+              const randomPowerUp = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+              powerUpManager.addPowerUp(randomPowerUp);
+            }
+          }
+        } else {
+          // For skipped frames, use interpolation to maintain smooth tracking
+          if (advancedHandController.predictionEnabled) {
+            const interpolated = handPositionBuffer.interpolatePosition(currentTime);
+            if (interpolated && interpolated.confidence > 0.5) {
+              // Apply calibration to interpolated position
+              let interpolatedX = interpolated.x;
+              if(handCalibration.maxX > handCalibration.minX) {
+                interpolatedX = handCalibration.normalize(interpolatedX);
+              }
+              
+              // Update with interpolated position
+              handsCtrl.normX = kalmanFilter.update(interpolatedX, currentTime);
+            }
+          }
+        }
+        
+        // Draw hand landmarks with velocity-based coloring
+        const velocity = handPositionBuffer.getVelocity();
+        const velocityMagnitude = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+        
+        // Color based on velocity - red for fast movements, blue for slow
+        const velocityColor = velocityMagnitude > 0.5 ? 
+          `hsl(${Math.max(0, 240 - velocityMagnitude * 200)}, 80%, 60%)` : '#6ef';
+        
+        drawConnectors(htx, lm, HAND_CONNECTIONS, {color: velocityColor, lineWidth: 2});
+        drawLandmarks(htx, lm, {color: '#fff', lineWidth: 1});
+        
+        // Draw velocity vector for debugging (if debug mode is on)
+        if (debugVisible && velocityMagnitude > 0.1) {
+          htx.strokeStyle = '#ff0';
+          htx.lineWidth = 3;
+          htx.beginPath();
+          htx.moveTo(x * W, y * H);
+          htx.lineTo((x + velocity.x * 100) * W, (y + velocity.y * 100) * H);
+          htx.stroke();
+        }
+        
+      } else {
+        // No hand detected - use interpolation to maintain tracking briefly
+        if (advancedHandController.predictionEnabled) {
+          const interpolated = handPositionBuffer.interpolatePosition(currentTime);
+          if (interpolated && interpolated.confidence > 0.3) {
+            // Continue tracking with reduced confidence
+            handsCtrl.handUp = true; // Assume hand is still up briefly
+            
+            // Apply calibration to interpolated position
+            let interpolatedX = interpolated.x;
+            if(handCalibration.maxX > handCalibration.minX) {
+              interpolatedX = handCalibration.normalize(interpolatedX);
+            }
+            
+            handsCtrl.normX = kalmanFilter.update(interpolatedX, currentTime);
+          } else {
+            // Lost tracking completely
+            handsCtrl.handUp = false;
+            handPositionBuffer.clear(); // Reset buffer when tracking is lost
+          }
+        } else {
+          handsCtrl.handUp = false;
+        }
+      }
+      
+      // Performance monitoring
+      const processingTime = performance.now() - currentTime;
+      if (processingTime > advancedHandController.targetFrameTime * 1.5) {
+        // If processing is too slow, increase frame skipping
+        advancedHandController.maxFrameSkip = Math.min(3, advancedHandController.maxFrameSkip + 1);
+      } else if (processingTime < advancedHandController.targetFrameTime * 0.5 && 
+                 advancedHandController.maxFrameSkip > 1) {
+        // If we have headroom, reduce frame skipping
+        advancedHandController.maxFrameSkip = Math.max(1, advancedHandController.maxFrameSkip - 1);
+      }
+    }
+    
+    function showGestureHint(gesture, velocity = 0) {
+      els.gestureHint.style.display = 'block';
+      const speedText = velocity > 1.5 ? ' (Rápido)' : velocity > 0.8 ? ' (Medio)' : ' (Lento)';
+      els.gestureHint.textContent = gesture === 'swipe_right' ? 
+        `👉 Gesto derecha${speedText}` : `👈 Gesto izquierda${speedText}`;
+      setTimeout(() => {
+        els.gestureHint.style.display = 'none';
+      }, 1000);
+    }
+
+    // ====== PokeAPI helpers ======
+    const cache = new Map();
+    
+    async function fetchPokemon(id) {
+      if(cache.has(id)) return cache.get(id);
+      
+      try {
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+        const j = await res.json();
+        const stats = {};
+        
+        for(const s of j.stats) {
+          stats[s.stat.name] = s.base_stat;
+        }
+        
+        const mon = {
+          id,
+          name: j.name,
+          atk: stats['attack'] || 0,
+          def: stats['defense'] || 0,
+          spd: stats['speed'] || 0,
+          sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+          isLegendary: isLegendaryPokemon(id),
+          isShiny: Math.random() < 0.05 // 5% shiny chance
+        };
+        
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = mon.sprite;
+        mon.img = img;
+        
+        cache.set(id, mon);
+        return mon;
+      } catch(e) {
+        console.error('Error fetching pokemon:', e);
+        return null;
+      }
+    }
+    
+    function isLegendaryPokemon(id) {
+      const legendaryIds = [144, 145, 146, 150, 151]; // Gen 1 legendaries
+      return legendaryIds.includes(id) || Math.random() < 0.02; // 2% legendary chance
+    }
+    
+    function randMonId() {
+      return Math.floor(1 + Math.random() * 151); // Gen 1
+    }
+    
+    async function spawnMon() {
+      const id = randMonId();
+      const mon = await fetchPokemon(id);
+      if(!mon) return;
+      
+      const scale = 0.9 + Math.random() * 0.5;
+      const w = 56 * scale, h = 56 * scale;
+      const x = 20 + Math.random() * (VW - 40 - w);
+      const vy = (baseFall + Math.random() * 80 + captured * 1.2) * timeDilation;
+      
+      const monObj = pokemonPool.get();
+      Object.assign(monObj, {
+        ref: mon,
+        x, y: -h, w, h, vy,
+        isPowerUp: Math.random() < 0.1 // 10% chance to carry power-up
+      });
+      
+      mons.push(monObj);
+    }
+
+    // ====== Sidebar updates ======
+    function renderLives() {
+      els.lives.innerHTML = '';
+      for(let i = 0; i < MAX_LIVES; i++) {
+        const s = document.createElement('div');
+        s.className = 'ball' + (i < lives ? '' : ' off');
+        els.lives.appendChild(s);
+      }
+    }
+    
+    function addCaught(mon) {
+      const li = document.createElement('div');
+      li.className = 'poke';
+      
+      if(mon.isShiny) {
+        li.classList.add('shiny');
+        shinyCount++;
+        els.shinyCount.textContent = shinyCount;
+      }
+      
+      if(mon.isLegendary) {
+        li.classList.add('legendary');
+        legendaryCount++;
+        els.legendaryCount.textContent = legendaryCount;
+      }
+      
+      const nameDisplay = mon.name.charAt(0).toUpperCase() + mon.name.slice(1);
+      const specialText = mon.isShiny ? ' ✨' : (mon.isLegendary ? ' 🔥' : '');
+      
+      li.innerHTML = `
+        <img src="${mon.sprite}" alt="${mon.name}">
+        <div style="text-transform:capitalize">${nameDisplay}${specialText}</div>
+        <div style="font-size:10px;color:var(--muted)">⚔ ${mon.atk} • 🛡 ${mon.def} • 💨 ${mon.spd}</div>
+      `;
+      els.list.prepend(li);
+    }
+    
+    function setTeamStats() {
+      els.atk.textContent = team.atk;
+      els.def.textContent = team.def;
+      els.spd.textContent = team.spd;
+    }
+
+    // ====== Game control ======
+    function start(mode) {
+      control = mode;
+      state = GameStates.PLAYING;
+      score = 0;
+      captured = 0;
+      lives = MAX_LIVES;
+      shinyCount = 0;
+      legendaryCount = 0;
+      totalMissed = 0;
+      scoreMultiplier = 1;
+      timeDilation = 1.0;
+      magnetActive = false;
+      
+      team.atk = team.def = team.spd = 0;
+      els.list.innerHTML = '';
+      renderLives();
+      setTeamStats();
+      
+      spawnInterval = 900;
+      baseFall = 120;
+      lastSpawn = 0;
+      mons.length = 0;
+      startTime = performance.now();
+      paused = false;
+      pauseStart = null;
+      pausedMs = 0;
+      
+      powerUpManager.activePowerUps.clear();
+      powerUpManager.updateUI();
+      particleSystem.particles.length = 0;
+      
+      els.menu.style.display = 'none';
+      els.over.style.display = 'none';
+      els.shinyCount.textContent = '0';
+      els.legendaryCount.textContent = '0';
+      
+      fit();
+    }
+    
+    function endGame(title, msg) {
+      state = GameStates.GAME_OVER;
+      
+      // Update difficulty manager
+      const totalTime = performance.now() - startTime - pausedMs;
+      difficultyManager.updateSkill(captured, totalMissed, totalTime);
+      
+      // Update high score
+      const newHighScore = GameData.updateHighScore(score);
+      els.highScore.textContent = newHighScore;
+      
+      // Deactivate all power-ups
+      for(const [type, powerUp] of powerUpManager.activePowerUps) {
+        powerUp.type.deactivate();
+      }
+      powerUpManager.activePowerUps.clear();
+      powerUpManager.updateUI();
+      
+      els.overTitle.textContent = title;
+      els.overMsg.innerHTML = msg;
+      els.over.style.display = 'grid';
+    }
+
+    // ====== Drawing ======
+    function drawTrainer() {
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      
+      // Enhanced glow effect
+      ctx.shadowColor = 'rgba(124,92,255,.7)';
+      ctx.shadowBlur = 24;
+      
+      // Basket with gradient
+      const gradient = ctx.createLinearGradient(-player.w/2, 0, player.w/2, player.h);
+      gradient.addColorStop(0, 'rgba(124,92,255,.92)');
+      gradient.addColorStop(1, 'rgba(124,92,255,.7)');
+      ctx.fillStyle = gradient;
+      
+      const w = player.w, h = player.h, r = 12;
+      ctx.beginPath();
+      ctx.moveTo(-w/2 + r, 0);
+      ctx.arcTo(w/2, 0, w/2, h, r);
+      ctx.arcTo(w/2, h, -w/2, h, r);
+      ctx.arcTo(-w/2, h, -w/2, 0, r);
+      ctx.arcTo(-w/2, 0, w/2, 0, r);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Magnet effect
+      if(magnetActive) {
+        ctx.strokeStyle = '#e57373';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.arc(0, h/2, w/2 + 20, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      
+      // Hand indicator
+      ctx.fillStyle = 'hsl(200 80% 70%)';
+      ctx.beginPath();
+      ctx.arc(0, -10, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+    }
+    
+    function drawMon(m) {
+      ctx.save();
+      
+      // Special effects for shiny/legendary
+      if(m.ref.isShiny) {
+        ctx.shadowColor = '#ffeb3b';
+        ctx.shadowBlur = 15;
+      } else if(m.ref.isLegendary) {
+        ctx.shadowColor = '#ff6b6b';
+        ctx.shadowBlur = 20;
+      }
+      
+      // Power-up indicator
+      if(m.isPowerUp) {
+        ctx.strokeStyle = '#4caf50';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 3]);
+        ctx.strokeRect(m.x - 5, m.y - 5, m.w + 10, m.h + 10);
+        ctx.setLineDash([]);
+      }
+      
+      const {img} = m.ref;
+      if(img && img.complete) {
+        ctx.drawImage(img, m.x, m.y, m.w, m.h);
+      } else {
+        ctx.fillStyle = '#ffd';
+        ctx.fillRect(m.x, m.y, m.w, m.h);
+      }
+      
+      ctx.restore();
+    }
+    
+    function drawBackground(dt) {
+      // Animated background gradients
+      const time = performance.now() * 0.001;
+      
+      const g = ctx.createRadialGradient(
+        VW/2 + Math.sin(time * 0.5) * 100, 
+        VH * 0.2, 
+        VW * 0.1,
+        VW/2, 
+        VH * 0.2, 
+        VW * 0.9
+      );
+      g.addColorStop(0, 'rgba(124,92,255,.18)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, VW, VH);
+      
+      ctx.save();
+      ctx.fillStyle = 'rgba(25,230,255,.08)';
+      ctx.beginPath();
+      ctx.ellipse(VW/2, VH - 24, VW/2.6, 40, Math.sin(time) * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ====== Math ======
+    function collide(a, b) {
+      return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+    }
+    
+    function distance(a, b) {
+      const dx = (a.x + a.w/2) - (b.x + b.w/2);
+      const dy = (a.y + a.h/2) - (b.y + b.h/2);
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    // ====== Main Loop ======
+    let last = performance.now(), debugVisible = false;
+    
+    function loop(now) {
+      const dt = Math.min(0.035, (now - last) / 1000);
+      last = now;
+      
+      if(state === GameStates.PLAYING) {
+        update(dt, now);
+        render(dt);
+      }
+      
+      requestAnimationFrame(loop);
+    }
+    
+    requestAnimationFrame(loop);
+
+    function update(dt, now) {
+      // Hand control with calibration
+      if(control === 'hands') {
+        const ok = handsCtrl.active && handsCtrl.handUp;
+        
+        if(!ok) {
+          if(!paused) {
+            paused = true;
+            pauseStart = now;
+            els.centerMsg.style.display = 'block';
+            els.centerMsg.textContent = 'Por favor levante la mano 🙌';
+          }
+        } else {
+          if(paused) {
+            paused = false;
+            if(pauseStart) {
+              pausedMs += (now - pauseStart);
+              pauseStart = null;
+            }
+            els.centerMsg.style.display = 'none';
+          }
+          
+          const nx = handsCtrl.normX;
+          const target = 30 + nx * (VW - 60);
+          player.x += (target - player.x) * 0.25;
+        }
+      } else {
+        if(paused) {
+          paused = false;
+          if(pauseStart) {
+            pausedMs += (now - pauseStart);
+            pauseStart = null;
+          }
+          els.centerMsg.style.display = 'none';
+        }
+        keyboardInput(dt);
+      }
+      
+      player.x = Math.max(30, Math.min(VW - 30, player.x));
+      
+      if(!paused) {
+        // Update systems
+        powerUpManager.update(dt);
+        particleSystem.update(dt);
+        
+        // Difficulty ramps with time dilation
+        const effectiveDt = dt * timeDilation;
+        spawnInterval = Math.max(260, spawnInterval - effectiveDt * 3);
+        baseFall = Math.min(500, baseFall + effectiveDt * 10);
+        
+        // Spawn monsters
+        lastSpawn += effectiveDt * 1000;
+        if(lastSpawn > spawnInterval) {
+          lastSpawn = 0;
+          spawnMon();
+          if(Math.random() < 0.35) spawnMon();
+        }
+        
+        // Move monsters with magnet effect
+        const trainerCenter = {x: player.x, y: player.y - player.h/2};
+        
+        for(let i = mons.length - 1; i >= 0; i--) {
+          const m = mons[i];
+          
+          // Normal movement
+          m.y += m.vy * effectiveDt;
+          
+          // Magnet effect
+          if(magnetActive) {
+            const dist = distance(trainerCenter, {x: m.x + m.w/2, y: m.y + m.h/2});
+            if(dist < 150) {
+              const pull = 200 * effectiveDt * (1 - dist/150);
+              const dx = trainerCenter.x - (m.x + m.w/2);
+              const dy = trainerCenter.y - (m.y + m.h/2);
+              const len = Math.sqrt(dx*dx + dy*dy);
+              if(len > 0) {
+                m.x += (dx/len) * pull;
+                m.y += (dy/len) * pull;
+              }
+            }
+          }
+        }
+        
+        // Collision detection
+        const trainerRect = {
+          x: player.x - player.w/2,
+          y: player.y - player.h,
+          w: player.w,
+          h: player.h + 10
+        };
+        
+        for(let i = mons.length - 1; i >= 0; i--) {
+          const m = mons[i];
+          const monRect = {x: m.x, y: m.y, w: m.w, h: m.h};
+          
+          if(collide(trainerRect, monRect)) {
+            let points = 1;
+            
+            // Special pokemon bonuses
+            if(m.ref.isShiny) {
+              points = 5;
+              particleSystem.addSpecialEffect(m.x + m.w/2, m.y + m.h/2, 'shiny');
+              audioManager.playSpecialCatch();
+            } else if(m.ref.isLegendary) {
+              points = 10;
+              particleSystem.addSpecialEffect(m.x + m.w/2, m.y + m.h/2, 'legendary');
+              audioManager.playSpecialCatch();
+            } else {
+              audioManager.playCatch();
+            }
+            
+            // Power-up chance
+            if(m.isPowerUp) {
+              const powerUpTypes = Object.keys(powerUpManager.powerUpTypes);
+              const randomPowerUp = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+              powerUpManager.addPowerUp(randomPowerUp);
+            }
+            
+            score += points * scoreMultiplier;
+            captured += 1;
+            team.atk += m.ref.atk;
+            team.def += m.ref.def;
+            team.spd += m.ref.spd;
+            
+            addCaught(m.ref);
+            setTeamStats();
+            particleSystem.addCatchEffect(m.x + m.w/2, m.y + m.h/2);
+            
+            pokemonPool.release(m);
+            mons.splice(i, 1);
+          }
+        }
+        
+        // Remove missed pokemon
+        for(let i = mons.length - 1; i >= 0; i--) {
+          const m = mons[i];
+          if(m.y > VH) {
+            totalMissed++;
+            lives = Math.max(0, lives - 1);
+            renderLives();
+            audioManager.playMiss();
+            pokemonPool.release(m);
+            mons.splice(i, 1);
+          }
+        }
+      }
+      
+      // Time and win/lose conditions
+      const elapsedPlay = (now - startTime) - pausedMs;
+      const left = Math.max(0, ROUND_MS - elapsedPlay);
+      
+      els.time.textContent = fmtTime(left);
+      els.score.textContent = score;
+      els.caught.textContent = captured;
+      
+      if(captured >= TARGET_CATCH) {
+        endGame('¡Victoria!', `¡Atrapaste ${captured} Pokémon! ⭐ Puntos: <b>${score}</b><br>Shiny: ${shinyCount} • Legendarios: ${legendaryCount}`);
+      } else if(lives <= 0) {
+        endGame('Game Over', `Te quedaste sin pokébolas. Capturados: <b>${captured}</b>`);
+      } else if(left <= 0) {
+        endGame('Game Over', `Se acabó el tiempo. Capturados: <b>${captured}</b>`);
+      }
+    }
+    
+    function render(dt) {
+      ctx.clearRect(0, 0, VW, VH);
+      drawBackground(dt);
+      
+      for(const m of mons) {
+        drawMon(m);
+      }
+      
+      drawTrainer();
+      particleSystem.render(ctx);
+    }
+    
+    function fmtTime(ms) {
+      const s = Math.ceil(ms / 1000);
+      const m = (s / 60) | 0;
+      const ss = (s % 60).toString().padStart(2, '0');
+      return `${m}:${ss}`;
+    }
+
+    // ====== Event Listeners ======
+    els.startHands.addEventListener('click', async () => {
+      await handsCtrl.start();
+      control = 'hands';
+      els.modeChip.textContent = 'Mano';
+      start('hands');
+    });
+    
+    els.startKb.addEventListener('click', () => {
+      control = 'keyboard';
+      els.modeChip.textContent = 'Teclado';
+      start('keyboard');
+    });
+    
+    els.retry.addEventListener('click', () => start(control));
+    
+    els.toMenu.addEventListener('click', () => {
+      state = GameStates.MENU;
+      els.menu.style.display = 'grid';
+      els.over.style.display = 'none';
+    });
+    
+    els.toggleMode.addEventListener('click', async () => {
+      if(control === 'keyboard') {
+        await handsCtrl.start();
+        control = 'hands';
+        els.modeChip.textContent = 'Mano';
+      } else {
+        control = 'keyboard';
+        els.modeChip.textContent = 'Teclado';
+      }
+    });
+    
+    els.toggleDebug.addEventListener('click', () => {
+      debugVisible = !debugVisible;
+      els.debug.style.display = debugVisible ? 'block' : 'none';
+    });
+    
+    els.calibrateBtn.addEventListener('click', () => {
+      handCalibration.start();
+    });
+    
+    els.soundToggle.addEventListener('click', () => {
+      const enabled = audioManager.toggle();
+      els.soundToggle.textContent = enabled ? '🔊' : '🔇';
+    });
+
+    // ====== Keyboard shortcuts ======
+    window.addEventListener('keydown', (e) => {
+      if(state === GameStates.PLAYING) {
+        switch(e.key.toLowerCase()) {
+          case 'p':
+            // Toggle pause
+            paused = !paused;
+            if(paused) {
+              pauseStart = performance.now();
+              els.centerMsg.style.display = 'block';
+              els.centerMsg.textContent = 'PAUSA - Presiona P para continuar';
+            } else {
+              if(pauseStart) {
+                pausedMs += (performance.now() - pauseStart);
+                pauseStart = null;
+              }
+              els.centerMsg.style.display = 'none';
+            }
+            break;
+          case 'c':
+            if(control === 'hands' && handsCtrl.active) {
+              handCalibration.start();
+            }
+            break;
+          case 'm':
+            audioManager.toggle();
+            els.soundToggle.textContent = audioManager.enabled ? '🔊' : '🔇';
+            break;
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+            // Cheat codes for testing power-ups
+            if(e.ctrlKey) {
+              const powerUps = Object.keys(powerUpManager.powerUpTypes);
+              const index = parseInt(e.key) - 1;
+              if(powerUps[index]) {
+                powerUpManager.addPowerUp(powerUps[index]);
+              }
+            }
+            break;
+        }
+      }
+    });
+
+    // ====== Touch/Mobile Support ======
+    let touchStartX = 0;
+    let touchActive = false;
+    
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if(control === 'keyboard' || control === 'touch') {
+        touchActive = true;
+        touchStartX = e.touches[0].clientX;
+        updateTouchPosition(e.touches[0].clientX);
+      }
+    });
+    
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if(touchActive && (control === 'keyboard' || control === 'touch')) {
+        updateTouchPosition(e.touches[0].clientX);
+      }
+    });
+    
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      touchActive = false;
+    });
+    
+    function updateTouchPosition(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const normalizedX = (clientX - rect.left) / rect.width;
+      const targetX = 30 + normalizedX * (VW - 60);
+      player.x = Math.max(30, Math.min(VW - 30, targetX));
+    }
+
+    // ====== Advanced Analytics ======
+    class GameAnalytics {
+      constructor() {
+        this.sessionData = {
+          startTime: Date.now(),
+          catches: [],
+          misses: [],
+          powerUpsUsed: [],
+          gesturesDetected: []
+        };
+      }
+      
+      recordCatch(pokemon, points, wasSpecial) {
+        this.sessionData.catches.push({
+          time: Date.now(),
+          pokemon: pokemon.name,
+          points,
+          wasSpecial,
+          isShiny: pokemon.isShiny,
+          isLegendary: pokemon.isLegendary
+        });
+      }
+      
+      recordMiss() {
+        this.sessionData.misses.push({
+          time: Date.now()
+        });
+      }
+      
+      recordPowerUp(type) {
+        this.sessionData.powerUpsUsed.push({
+          time: Date.now(),
+          type
+        });
+      }
+      
+      recordGesture(gesture) {
+        this.sessionData.gesturesDetected.push({
+          time: Date.now(),
+          gesture
+        });
+      }
+      
+      getStats() {
+        const sessionLength = Date.now() - this.sessionData.startTime;
+        const totalCatches = this.sessionData.catches.length;
+        const totalMisses = this.sessionData.misses.length;
+        const accuracy = totalCatches / (totalCatches + totalMisses) || 0;
+        
+        return {
+          sessionLength,
+          totalCatches,
+          totalMisses,
+          accuracy,
+          averagePointsPerCatch: this.sessionData.catches.reduce((sum, c) => sum + c.points, 0) / totalCatches || 0,
+          specialCatches: this.sessionData.catches.filter(c => c.wasSpecial).length,
+          powerUpsUsed: this.sessionData.powerUpsUsed.length,
+          gesturesDetected: this.sessionData.gesturesDetected.length
+        };
+      }
+    }
+    
+    const analytics = new GameAnalytics();
+
+    // ====== Performance Monitor ======
+    class PerformanceMonitor {
+      constructor() {
+        this.frameCount = 0;
+        this.lastFpsUpdate = performance.now();
+        this.fps = 60;
+        this.frameTime = 0;
+      }
+      
+      update(currentTime) {
+        this.frameCount++;
+        this.frameTime = currentTime - this.lastFrameTime || 0;
+        this.lastFrameTime = currentTime;
+        
+        if(currentTime - this.lastFpsUpdate > 1000) {
+          this.fps = this.frameCount;
+          this.frameCount = 0;
+          this.lastFpsUpdate = currentTime;
+          
+          // Auto-adjust quality if performance is poor
+          if(this.fps < 30 && particleSystem.particles.length > 50) {
+            // Reduce particles for better performance
+            particleSystem.particles.splice(0, 20);
+          }
+        }
+      }
+      
+      getFPS() {
+        return this.fps;
+      }
+    }
+    
+    const perfMonitor = new PerformanceMonitor();
+
+    // ====== Achievements System ======
+    class AchievementSystem {
+      constructor() {
+        this.achievements = {
+          firstCatch: { name: "Primer Pokémon", description: "Atrapa tu primer Pokémon", unlocked: false },
+          speedDemon: { name: "Demonio de Velocidad", description: "Atrapa 10 Pokémon en 30 segundos", unlocked: false },
+          shinyHunter: { name: "Cazador Shiny", description: "Atrapa un Pokémon shiny", unlocked: false },
+          legendaryMaster: { name: "Maestro Legendario", description: "Atrapa un Pokémon legendario", unlocked: false },
+          perfectionist: { name: "Perfeccionista", description: "Completa un juego sin perder vidas", unlocked: false },
+          gestureWizard: { name: "Mago de Gestos", description: "Activa 5 power-ups con gestos", unlocked: false }
+        };
+        
+        this.tempCounters = {
+          fastCatches: [],
+          gestureActivations: 0,
+          livesLost: 0
+        };
+        
+        this.loadProgress();
+      }
+      
+      loadProgress() {
+        try {
+          const saved = localStorage.getItem('pokemonAchievements');
+          if(saved) {
+            const data = JSON.parse(saved);
+            Object.assign(this.achievements, data);
+          }
+        } catch(e) {}
+      }
+      
+      saveProgress() {
+        try {
+          localStorage.setItem('pokemonAchievements', JSON.stringify(this.achievements));
+        } catch(e) {}
+      }
+      
+      checkAchievement(type, data = {}) {
+        switch(type) {
+          case 'catch':
+            if(!this.achievements.firstCatch.unlocked) {
+              this.unlock('firstCatch');
+            }
+            
+            // Speed demon check
+            const now = Date.now();
+            this.tempCounters.fastCatches.push(now);
+            this.tempCounters.fastCatches = this.tempCounters.fastCatches.filter(t => now - t < 30000);
+            if(this.tempCounters.fastCatches.length >= 10 && !this.achievements.speedDemon.unlocked) {
+              this.unlock('speedDemon');
+            }
+            break;
+            
+          case 'shiny':
+            if(!this.achievements.shinyHunter.unlocked) {
+              this.unlock('shinyHunter');
+            }
+            break;
+            
+          case 'legendary':
+            if(!this.achievements.legendaryMaster.unlocked) {
+              this.unlock('legendaryMaster');
+            }
+            break;
+            
+          case 'gesture_powerup':
+            this.tempCounters.gestureActivations++;
+            if(this.tempCounters.gestureActivations >= 5 && !this.achievements.gestureWizard.unlocked) {
+              this.unlock('gestureWizard');
+            }
+            break;
+            
+          case 'life_lost':
+            this.tempCounters.livesLost++;
+            break;
+            
+          case 'game_end':
+            if(this.tempCounters.livesLost === 0 && captured >= TARGET_CATCH && !this.achievements.perfectionist.unlocked) {
+              this.unlock('perfectionist');
+            }
+            break;
+        }
+      }
+      
+      unlock(achievementId) {
+        if(this.achievements[achievementId] && !this.achievements[achievementId].unlocked) {
+          this.achievements[achievementId].unlocked = true;
+          this.showAchievementNotification(this.achievements[achievementId]);
+          this.saveProgress();
+          audioManager.playPowerUp();
+        }
+      }
+      
+      showAchievementNotification(achievement) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #ffd700, #ff8f00);
+          color: #000;
+          padding: 16px 20px;
+          border-radius: 12px;
+          font-weight: bold;
+          z-index: 10000;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+          animation: slideIn 0.5s ease-out;
+        `;
+        
+        notification.innerHTML = `
+          <div style="font-size: 14px;">🏆 ¡Logro Desbloqueado!</div>
+          <div style="font-size: 16px; margin-top: 4px;">${achievement.name}</div>
+          <div style="font-size: 12px; margin-top: 2px; opacity: 0.8;">${achievement.description}</div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = 'slideOut 0.5s ease-in';
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 500);
+        }, 3000);
+      }
+      
+      resetTempCounters() {
+        this.tempCounters = {
+          fastCatches: [],
+          gestureActivations: 0,
+          livesLost: 0
+        };
+      }
+    }
+    
+    const achievementSystem = new AchievementSystem();
+
+    // ====== Add achievement styles ======
+    const achievementStyles = document.createElement('style');
+    achievementStyles.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(achievementStyles);
+
+    // ====== Enhanced collision system ======
+    function enhancedCollisionCheck() {
+      const trainerRect = {
+        x: player.x - player.w/2,
+        y: player.y - player.h,
+        w: player.w,
+        h: player.h + 10
+      };
+      
+      for(let i = mons.length - 1; i >= 0; i--) {
+        const m = mons[i];
+        const monRect = {x: m.x, y: m.y, w: m.w, h: m.h};
+        
+        if(collide(trainerRect, monRect)) {
+          let points = 1;
+          let wasSpecial = false;
+          
+          // Special pokemon bonuses
+          if(m.ref.isShiny) {
+            points = 5;
+            wasSpecial = true;
+            particleSystem.addSpecialEffect(m.x + m.w/2, m.y + m.h/2, 'shiny');
+            audioManager.playSpecialCatch();
+            achievementSystem.checkAchievement('shiny');
+          } else if(m.ref.isLegendary) {
+            points = 10;
+            wasSpecial = true;
+            particleSystem.addSpecialEffect(m.x + m.w/2, m.y + m.h/2, 'legendary');
+            audioManager.playSpecialCatch();
+            achievementSystem.checkAchievement('legendary');
+          } else {
+            audioManager.playCatch();
+          }
+          
+          // Power-up chance
+          if(m.isPowerUp) {
+            const powerUpTypes = Object.keys(powerUpManager.powerUpTypes);
+            const randomPowerUp = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+            powerUpManager.addPowerUp(randomPowerUp);
+            analytics.recordPowerUp(randomPowerUp);
+          }
+          
+          score += points * scoreMultiplier;
+          captured += 1;
+          team.atk += m.ref.atk;
+          team.def += m.ref.def;
+          team.spd += m.ref.spd;
+          
+          addCaught(m.ref);
+          setTeamStats();
+          particleSystem.addCatchEffect(m.x + m.w/2, m.y + m.h/2);
+          
+          // Analytics and achievements
+          analytics.recordCatch(m.ref, points * scoreMultiplier, wasSpecial);
+          achievementSystem.checkAchievement('catch');
+          
+          pokemonPool.release(m);
+          mons.splice(i, 1);
+          
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // ====== Override update function to use enhanced systems ======
+    function update(dt, now) {
+      perfMonitor.update(now);
+      
+      // Enhanced hand control with velocity-based smoothing
+      if(control === 'hands') {
+        const ok = handsCtrl.active && handsCtrl.handUp;
+        
+        if(!ok) {
+          // Check if we should wait before showing message
+          const timeSinceLastDetection = now - lastHandDetectedTime;
+          
+          if(timeSinceLastDetection > HAND_LOSS_DELAY) {
+            // Only pause and show message after 1 second delay
+            if(!paused) {
+              paused = true;
+              pauseStart = now;
+              handLostMessageShown = true;
+              els.centerMsg.style.display = 'block';
+              els.centerMsg.textContent = 'Por favor levante la mano 🙌';
+            }
+          } else {
+            // During the 1 second delay, maintain last position
+            // Player keeps their last position, game continues normally
+            // No message shown during the grace period
+          }
+        } else {
+          // Hand is detected
+          lastHandDetectedTime = now; // Update last detection time
+          
+          if(paused && handLostMessageShown) {
+            paused = false;
+            handLostMessageShown = false;
+            if(pauseStart) {
+              pausedMs += (now - pauseStart);
+              pauseStart = null;
+            }
+            els.centerMsg.style.display = 'none';
+          }
+          
+          const nx = handsCtrl.normX;
+          const target = 30 + nx * (VW - 60);
+          
+          // Enhanced position tracking with adaptive smoothing
+          const currentVelocity = Math.abs(kalmanFilter.getVelocity());
+          const distance = Math.abs(target - player.x);
+          
+          // Adaptive smoothing: faster for quick movements, smoother for precision
+          let smoothingFactor;
+          if (currentVelocity > 3.0 || distance > 100) {
+            // Fast movement or large distance - high responsiveness
+            smoothingFactor = 0.65;
+          } else if (currentVelocity > 1.5 || distance > 50) {
+            // Medium movement - balanced responsiveness
+            smoothingFactor = 0.45;
+          } else {
+            // Slow/precise movement - smoother tracking
+            smoothingFactor = 0.25;
+          }
+          
+          // Apply velocity-based prediction for ultra-responsive feel
+          const velocityPrediction = kalmanFilter.predict(dt);
+          const predictedTarget = 30 + velocityPrediction * (VW - 60);
+          
+          // Blend current target with prediction based on velocity
+          const predictionWeight = Math.min(0.3, currentVelocity / 10);
+          const finalTarget = target * (1 - predictionWeight) + predictedTarget * predictionWeight;
+          
+          // Apply enhanced smoothing
+          player.x += (finalTarget - player.x) * smoothingFactor;
+          
+          // Apply bounds with soft constraints for better feel
+          const margin = 30;
+          if (player.x < margin) {
+            player.x = margin + (player.x - margin) * 0.1; // Soft boundary
+          } else if (player.x > VW - margin) {
+            player.x = (VW - margin) + (player.x - (VW - margin)) * 0.1; // Soft boundary
+          }
+        }
+      } else {
+        if(paused) {
+          paused = false;
+          if(pauseStart) {
+            pausedMs += (now - pauseStart);
+            pauseStart = null;
+          }
+          els.centerMsg.style.display = 'none';
+        }
+        keyboardInput(dt);
+      }
+      
+      player.x = Math.max(30, Math.min(VW - 30, player.x));
+      
+      if(!paused) {
+        // Update systems
+        powerUpManager.update(dt);
+        particleSystem.update(dt);
+        
+        // Difficulty ramps with time dilation
+        const effectiveDt = dt * timeDilation;
+        spawnInterval = Math.max(260, spawnInterval - effectiveDt * 3);
+        baseFall = Math.min(500, baseFall + effectiveDt * 10);
+        
+        // Spawn monsters
+        lastSpawn += effectiveDt * 1000;
+        if(lastSpawn > spawnInterval) {
+          lastSpawn = 0;
+          spawnMon();
+          if(Math.random() < 0.35) spawnMon();
+        }
+        
+        // Move monsters with magnet effect
+        const trainerCenter = {x: player.x, y: player.y - player.h/2};
+        
+        for(let i = mons.length - 1; i >= 0; i--) {
+          const m = mons[i];
+          
+          // Normal movement
+          m.y += m.vy * effectiveDt;
+          
+          // Magnet effect
+          if(magnetActive) {
+            const dist = distance(trainerCenter, {x: m.x + m.w/2, y: m.y + m.h/2});
+            if(dist < 150) {
+              const pull = 200 * effectiveDt * (1 - dist/150);
+              const dx = trainerCenter.x - (m.x + m.w/2);
+              const dy = trainerCenter.y - (m.y + m.h/2);
+              const len = Math.sqrt(dx*dx + dy*dy);
+              if(len > 0) {
+                m.x += (dx/len) * pull;
+                m.y += (dy/len) * pull;
+              }
+            }
+          }
+        }
+        
+        // Enhanced collision detection
+        enhancedCollisionCheck();
+        
+        // Remove missed pokemon
+        for(let i = mons.length - 1; i >= 0; i--) {
+          const m = mons[i];
+          if(m.y > VH) {
+            totalMissed++;
+            lives = Math.max(0, lives - 1);
+            renderLives();
+            audioManager.playMiss();
+            analytics.recordMiss();
+            achievementSystem.checkAchievement('life_lost');
+            pokemonPool.release(m);
+            mons.splice(i, 1);
+          }
+        }
+      }
+      
+      // Time and win/lose conditions
+      const elapsedPlay = (now - startTime) - pausedMs;
+      const left = Math.max(0, ROUND_MS - elapsedPlay);
+      
+      els.time.textContent = fmtTime(left);
+      els.score.textContent = score;
+      els.caught.textContent = captured;
+      
+      if(captured >= TARGET_CATCH) {
+        achievementSystem.checkAchievement('game_end');
+        endGame('¡Victoria!', `¡Atrapaste ${captured} Pokémon! ⭐ Puntos: <b>${score}</b><br>Shiny: ${shinyCount} • Legendarios: ${legendaryCount}`);
+      } else if(lives <= 0) {
+        achievementSystem.checkAchievement('game_end');
+        endGame('Game Over', `Te quedaste sin pokébolas. Capturados: <b>${captured}</b>`);
+      } else if(left <= 0) {
+        achievementSystem.checkAchievement('game_end');
+        endGame('Game Over', `Se acabó el tiempo. Capturados: <b>${captured}</b>`);
+      }
+    }
+
+    // ====== Override start function to reset systems ======
+    function start(mode) {
+      achievementSystem.resetTempCounters();
+      analytics.sessionData = {
+        startTime: Date.now(),
+        catches: [],
+        misses: [],
+        powerUpsUsed: [],
+        gesturesDetected: []
+      };
+      
+      control = mode;
+      state = GameStates.PLAYING;
+      score = 0;
+      captured = 0;
+      lives = MAX_LIVES;
+      shinyCount = 0;
+      legendaryCount = 0;
+      totalMissed = 0;
+      scoreMultiplier = 1;
+      timeDilation = 1.0;
+      magnetActive = false;
+      
+      // Initialize hand detection timing
+      lastHandDetectedTime = performance.now();
+      handLostMessageShown = false;
+      
+      team.atk = team.def = team.spd = 0;
+      els.list.innerHTML = '';
+      renderLives();
+      setTeamStats();
+      
+      spawnInterval = 900;
+      baseFall = 120;
+      lastSpawn = 0;
+      mons.length = 0;
+      startTime = performance.now();
+      paused = false;
+      pauseStart = null;
+      pausedMs = 0;
+      
+      powerUpManager.activePowerUps.clear();
+      powerUpManager.updateUI();
+      particleSystem.particles.length = 0;
+      
+      els.menu.style.display = 'none';
+      els.over.style.display = 'none';
+      els.shinyCount.textContent = '0';
+      els.legendaryCount.textContent = '0';
+      
+      // Reset enhanced tracking systems for optimal performance
+      kalmanFilter.reset();
+      handPositionBuffer.clear();
+      advancedHandController.frameSkipCounter = 0;
+      advancedHandController.maxFrameSkip = 1;
+      advancedHandController.lastProcessTime = 0;
+      
+      fit();
+    }
+
+    // ====== Override gesture handling in onResults ======
+    function onResults(res) {
+      const W = els.handsCanvas.width, H = els.handsCanvas.height;
+      htx.clearRect(0, 0, W, H);
+      
+      if(res.image) htx.drawImage(res.image, 0, 0, W, H);
+      
+      const list = res.multiHandLandmarks || [];
+      
+      if(list.length >= 1) {
+        const lm = list[0];
+        
+        // Center of palm calculation
+        const idx = [0, 5, 9, 13, 17];
+        let x = 0, y = 0;
+        for(const i of idx) {
+          x += lm[i].x;
+          y += lm[i].y;
+        }
+        x /= idx.length;
+        y /= idx.length;
+        
+        // Apply Kalman filter
+        let raw = x;
+        if(handsCtrl.invertX) raw = 1 - raw;
+        
+        // Calibration
+        if(handCalibration.isCalibrating) {
+          handCalibration.calibrate(raw);
+        } else if(handCalibration.maxX > handCalibration.minX) {
+          raw = handCalibration.normalize(raw);
+        }
+        
+        handsCtrl.normX = kalmanFilter.update(raw);
+        
+        // Hand up detection
+        handsCtrl.handUp = y < 0.6;
+        
+        // Gesture detection
+        gestureDetector.addPosition(x, y);
+        const gesture = gestureDetector.detectSwipe();
+        if(gesture) {
+          showGestureHint(gesture);
+          analytics.recordGesture(gesture);
+          
+          // Trigger power-ups with gestures during gameplay
+          if(state === GameStates.PLAYING && Math.random() < 0.3) {
+            const powerUpTypes = Object.keys(powerUpManager.powerUpTypes);
+            const randomPowerUp = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+            powerUpManager.addPowerUp(randomPowerUp);
+            achievementSystem.checkAchievement('gesture_powerup');
+          }
+        }
+        
+        // Draw hand landmarks
+        drawConnectors(htx, lm, HAND_CONNECTIONS, {color: '#6ef', lineWidth: 2});
+        drawLandmarks(htx, lm, {color: '#fff', lineWidth: 1});
+        
+      } else {
+        handsCtrl.handUp = false;
+      }
+    }
+
+    // ====== Initialization ======
+    renderLives();
+    fit();
+    els.highScore.textContent = GameData.getHighScore();
+
+    // ====== Debug panel (optional) ======
+    if(window.location.search.includes('debug')) {
+      const debugPanel = document.createElement('div');
+      debugPanel.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        z-index: 9999;
+        min-width: 200px;
+      `;
+      debugPanel.id = 'debugPanel';
+      document.body.appendChild(debugPanel);
+      
+      setInterval(() => {
+        if(document.getElementById('debugPanel')) {
+          const stats = analytics.getStats();
+          document.getElementById('debugPanel').innerHTML = `
+            <div><strong>Debug Info</strong></div>
+            <div>FPS: ${perfMonitor.getFPS()}</div>
+            <div>Particles: ${particleSystem.particles.length}</div>
+            <div>Pokémon: ${mons.length}</div>
+            <div>Accuracy: ${(stats.accuracy * 100).toFixed(1)}%</div>
+            <div>Skill Level: ${(difficultyManager.playerSkill * 100).toFixed(1)}%</div>
+            <div>Hand X: ${handsCtrl.normX.toFixed(3)}</div>
+            <div>Hand Velocity: ${kalmanFilter.getVelocity().toFixed(3)}</div>
+            <div>Frame Skip: ${advancedHandController.maxFrameSkip}</div>
+            <div>Position Buffer: ${handPositionBuffer.positions.length}</div>
+            <div>Time Dilation: ${timeDilation.toFixed(2)}</div>
+            <div>Active Power-ups: ${powerUpManager.activePowerUps.size}</div>
+          `;
+        }
+      }, 100);
+    }
+
+  })();
 </script>
 </body>
 </html>
